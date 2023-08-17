@@ -1,0 +1,27 @@
+/* .logo {
+    padding-left: 50px;
+} */
+
+Nav.Link {
+  color: white !important;
+  transition: 0.5s;
+  font-weight: 600 !important;
+}
+
+.Nav.Link:hover {
+  text-decoration: underline;
+}
+
+/* Nav.Link::after {
+  content: '';
+  height: 0.3vh;
+  background: white;
+  position: absolute;
+  left: 0;
+  bottom: -0.2vh;
+  width: 0;
+}
+
+Nav.Link:hover::after {
+  width: 100%;
+} */
