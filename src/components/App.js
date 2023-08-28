@@ -15,7 +15,7 @@ function App() {
         <Routes>
           <Route exact path='/menu' Component={Menu} />
           <Route exact path='/chatBot' Component={ChatBot} />
-          <Route exact path='/' Component={Photo} />
+          <Route exact path='/' Component={ChatBot} />
         </Routes>
       </Router>
     </div>
