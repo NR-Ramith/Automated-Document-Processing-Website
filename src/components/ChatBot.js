@@ -27,22 +27,23 @@ const ChatBot = () => {
 
   const questions = [
     { id: 1, text: 'What is your name?', field: 'name' },
-    // { id: 2, text: 'What is your personal number?', field: 'personalNumber' },
-    // { id: 16, text: 'What is your email address?', field: 'email' },
-    // { id: 3, text: "What is your father's name?", field: 'fatherName' },
-    // { id: 4, text: "What is your father's number?", field: 'fatherNumber' },
-    // { id: 5, text: "What is your mother's name?", field: 'motherName' },
-    // { id: 6, text: "What is your mother's number?", field: 'motherNumber' },
-    // { id: 7, text: "What is your guardian's name?", field: 'guardianName' },
-    // { id: 8, text: "What is your guardian's number?", field: 'guardianNumber' },
+    { id: 2, text: 'What is your personal number?', field: 'personalNumber' },
+    { id: 16, text: 'What is your email address?', field: 'email' },
+    { id: 3, text: "What is your father's name?", field: 'fatherName' },
+    { id: 4, text: "What is your father's number?", field: 'fatherNumber' },
+    { id: 5, text: "What is your mother's name?", field: 'motherName' },
+    { id: 6, text: "What is your mother's number?", field: 'motherNumber' },
+    { id: 7, text: "What is your guardian's name?", field: 'guardianName' },
+    { id: 8, text: "What is your guardian's number?", field: 'guardianNumber' },
+    { id: 10, text: 'What is the current date? Speak the date in this format - YYYY dash MM dash DD', field: 'date' },
+
+    { id: 12, text: 'What is your city?', field: 'city' },
+    { id: 13, text: 'What is your state?', field: 'state' },
+    { id: 14, text: 'What is your nationality?', field: 'nationality' },
+    { id: 15, text: 'What is your pin code?', field: 'pinCode' },
     { id: 11, text: 'What is your address?', field: 'address' },
     { id: 9, text: 'What is your date of birth? Speak the date in this format - YYYY dash MM dash DD', field: 'dob' },
-    // { id: 10, text: 'What is the current date? Speak the date in this format - YYYY dash MM dash DD', field: 'date' },
-
-    // { id: 12, text: 'What is your city?', field: 'city' },
-    // { id: 13, text: 'What is your state?', field: 'state' },
-    // { id: 14, text: 'What is your nationality?', field: 'nationality' },
-    // { id: 15, text: 'What is your pin code?', field: 'pinCode' },
+    
   ];
 
   const handleVoiceInput = (event) => {
@@ -346,7 +347,7 @@ const ChatBot = () => {
         // Define the fields and their corresponding values
         const fields = {
           name,
-          personalNumber: 0,
+          personalNumber,
           email,
           fatherName,
           fatherNumber,
@@ -377,7 +378,7 @@ const ChatBot = () => {
           console.log('User input saved successfully');
 
           // Add the user inputs to the userInputs array
-          const newInput = { name, address, dob: updatedDob };
+          const newInput = userInputData;
           setUserInputs((prevUserInputs) => [...prevUserInputs, newInput]);
 
           // Clear the input fields
