@@ -177,6 +177,8 @@ const ChatBot = () => {
       currentQuestion.field === 'fatherName' ||
       currentQuestion.field === 'motherName' ||
       currentQuestion.field === 'guardianName' ||
+      currentQuestion.field === 'city' ||
+      currentQuestion.field === 'state' ||
       currentQuestion.field === 'nationality') {
       const { isValid, formattedName } = validateAndFormatName(userInput);
       if (!isValid) {
