@@ -13,9 +13,10 @@ function App() {
       <Router>
         <Header />
         <Routes>
+          <Route exact path='/formsList' Component={FormsList} />
           <Route exact path='/menu' Component={Menu} />
           <Route exact path='/chatBot' Component={ChatBot} />
-          <Route exact path='/' Component={FormsList} />
+          <Route exact path='/' Component={Home} />
         </Routes>
       </Router>
     </div>

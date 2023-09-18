@@ -1,23 +1,29 @@
 import React, { useState } from 'react';
-import './FormsList.css'; 
+import './FormsList.css';
+import { Link, useNavigate } from 'react-router-dom';
 
 const FormsList = () => {
     const [selectedForm, setSelectedForm] = useState(null);
 
+    const navigate = useNavigate();
+
     const forms = [
         {
+            id: 4,
             name: 'Account Opening Form for Resident Individuals',
             description: 'Fill this out to open a new financial account with the bank.',
             frontImage: require('../images/form1-1.jpeg'),
             images: [require('../images/form1-1.jpeg'), require('../images/form1-2.jpeg')],
         },
         {
+            id: 2,
             name: 'Information of Applicant/Signatory',
             description: 'Fill this out to provide essential personal and identification details required to establish an account or perform financial transactions.',
             frontImage: require('../images/form2-1.jpeg'),
             images: [require('../images/form2-1.jpeg'), require('../images/form2-2.jpeg')],
         },
         {
+            id: 3,
             name: 'Interview and Customer Due Diligence Form',
             description: 'Fill this out to complete as part of the process to gather detailed information from customers, aiding the bank in assessing risks, complying with regulations, and ensuring the legitimacy of financial transactions.',
             frontImage: require('../images/form3-1.jpeg'),
@@ -46,6 +52,11 @@ const FormsList = () => {
         setSelectedForm(null);
     };
 
+    const handleFillButtonClick = (form) => {
+        setSelectedForm(form);
+        navigate('/menu', { state: { selectedFormId: form.id } }); // Use navigate() for navigation
+    };
+
     return (
         <div className="forms-list-container">
             <h1 className="forms-list-heading">Available Forms</h1>
@@ -69,11 +80,7 @@ const FormsList = () => {
                 ) : (
                     <ul className="forms">
                         {forms.map((form, index) => (
-                            <li
-                                key={index}
-                                className="form-card"
-                                onClick={() => handleFormClick(form)}
-                            >
+                            <li key={index} className="form-card">
                                 <div className="form-preview">
                                     <img src={form.frontImage} alt={`${form.name} Preview`} />
                                 </div>
@@ -81,15 +88,17 @@ const FormsList = () => {
                                     <h3>{form.name}</h3>
                                     <p>{form.description}</p>
                                     <div className="buttons">
-                                        <button
-                                            className="button preview-button"
-                                            onClick={() => handleFormClick(form)}
-                                        >
+                                        {/* Only the button div is clickable */}
+                                        <div onClick={() => handleFormClick(form)} className="button preview-button">
                                             Preview
-                                        </button>
-                                        <a href="/menu">
-                                            <button className="button fill-form-button">Fill</button>
-                                        </a>
+                                        </div>
+
+                                        <div
+                                            onClick={() => handleFillButtonClick(form)}
+                                            className="button fill-form-button"
+                                        >
+                                            Fill
+                                        </div>
                                     </div>
                                 </div>
                             </li>

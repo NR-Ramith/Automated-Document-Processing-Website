@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
+import questions from "./questions";
 
 const ChatBot = () => {
   const [messages, setMessages] = useState([]);
@@ -24,28 +26,17 @@ const ChatBot = () => {
   const [voiceInput, setVoiceInput] = useState('');
   const inputRef = useRef(null);
   const [userInputs, setUserInputs] = useState([]);
+  const [familyIncome, setFamilyIncome] = useState('');
 
-  const questions = [
-    { id: 1, text: 'What is your name?', field: 'name' },
-    { id: 2, text: 'What is your personal number?', field: 'personalNumber' },
-    { id: 16, text: 'What is your email address?', field: 'email' },
-    { id: 3, text: "What is your father's name?", field: 'fatherName' },
-    { id: 4, text: "What is your father's number?", field: 'fatherNumber' },
-    { id: 5, text: "What is your mother's name?", field: 'motherName' },
-    { id: 6, text: "What is your mother's number?", field: 'motherNumber' },
-    { id: 7, text: "What is your guardian's name?", field: 'guardianName' },
-    { id: 8, text: "What is your guardian's number?", field: 'guardianNumber' },
-    { id: 10, text: 'What is the current date? Speak the date in this format - YYYY dash MM dash DD', field: 'date' },
 
-    { id: 12, text: 'What is your city?', field: 'city' },
-    { id: 13, text: 'What is your state?', field: 'state' },
-    { id: 14, text: 'What is your nationality?', field: 'nationality' },
-    { id: 15, text: 'What is your pin code?', field: 'pinCode' },
-    { id: 11, text: 'What is your address?', field: 'address' },
-    { id: 9, text: 'What is your date of birth? Speak the date in this format - YYYY dash MM dash DD', field: 'dob' },
-    
-  ];
+  const location = useLocation();
+  let selectedFormId = null;
+  if (location !== null) {
+    selectedFormId = location.state.selectedFormId;
+    console.log(selectedFormId);
+  }
 
+  
   const handleVoiceInput = (event) => {
     const transcript = event.results[0][0].transcript;
     setVoiceInput(transcript);
@@ -137,7 +128,7 @@ const ChatBot = () => {
     let userInput = voiceInput || inputRef.current.value; // Use voiceInput if available, otherwise use text input
     // Remove trailing full stop if it exists
     userInput = userInput.replace(/\.$/, '');
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = questions[selectedFormId][currentQuestionIndex];
     let updatedMessages = [];
 
     userInput = userInput.trim(); // Remove leading and trailing whitespace
@@ -152,9 +143,29 @@ const ChatBot = () => {
         readOutText(mandatoryMessage.text);
         return;
       }
+      if (currentQuestion.field === 'familyIncome') {
+        if (familyIncome==='') {
+          const mandatoryMessage = {
+            text: 'Please select an option.',
+            isUser: false,
+          };
+          setMessages([...messages, mandatoryMessage]);
+          readOutText(mandatoryMessage.text);
+          return;
+        }
+        // userInput=familyIncome;
+        // console.log(familyIncome);
+        // const familyIncomeMessage = { text: 'yes', isUser: true };
+        // setMessages(prevMessages => [...prevMessages, familyIncomeMessage]);
+        // setMessages([...messages, familyIncomeMessage]);
+        // readOutText(familyIncomeMessage.text);
+        // console.log(messages)
+        // setVoiceInput('');
+        // setUserInputs((prevUserInputs) => [...prevUserInputs, { familyIncome }]);
+      }
       // If user input is empty, just move to the next question
-      if (currentQuestionIndex + 1 < questions.length) {
-        const nextQuestion = questions[currentQuestionIndex + 1];
+      if (currentQuestionIndex + 1 < questions[selectedFormId].length) {
+        const nextQuestion = questions[selectedFormId][currentQuestionIndex + 1];
         const nextQuestionMessage = { text: nextQuestion.text, isUser: false };
         setMessages([...messages, nextQuestionMessage]);
         setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -246,13 +257,15 @@ const ChatBot = () => {
 
       if (!isValidDate(year, month, day)) {
         const invalidMessage = "Invalid Date. Please enter a valid calendar date.";
-        const invalidMessageObj = { text: invalidMessage, isUser: false };
+        const invalidMessageObj = { text: invalidMessage, isUser: true };
 
         setMessages([...messages, invalidMessageObj]);
         readOutText(invalidMessage);
         return; // Stop further processing
       }
     }
+
+    
 
     // Capture the user's input for the current field
     switch (currentQuestion.field) {
@@ -317,9 +330,9 @@ const ChatBot = () => {
     setVoiceInput('');
 
     // Move to the next field or end the conversation
-    if (currentQuestionIndex + 1 < questions.length) {
+    if (currentQuestionIndex + 1 < questions[selectedFormId].length) {
       // Ask the next question
-      const nextQuestion = questions[currentQuestionIndex + 1];
+      const nextQuestion = questions[selectedFormId][currentQuestionIndex + 1];
       const nextQuestionMessage = { text: nextQuestion.text, isUser: false };
       setMessages([...updatedMessages, nextQuestionMessage]);
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -406,7 +419,7 @@ const ChatBot = () => {
 
   useEffect(() => {
     // Ask the initial question when the component mounts
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = questions[selectedFormId][currentQuestionIndex];
     setMessages([...messages, { text: currentQuestion.text, isUser: false }]);
     readOutText(currentQuestion.text); // Read out the initial question
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -467,7 +480,29 @@ const ChatBot = () => {
             ))}
           </div>
         )}
-
+        {questions[selectedFormId][currentQuestionIndex].options ? (
+          <div className="checkbox-options">
+            {questions[selectedFormId][currentQuestionIndex].options.map((option) => (
+              <div key={option.value} className="checkbox-option">
+                <input
+                  type="checkbox"
+                  id={option.value}
+                  name={option.value}
+                  checked={familyIncome === option.value}
+                  onChange={() => {setFamilyIncome(option.value);
+                    const familyIncomeMessage = {
+                      text: option.value,
+                      isUser: true,
+                    };
+                    setMessages([...messages, familyIncomeMessage]);
+                    readOutText(familyIncomeMessage.text);
+                  }}
+                />
+                <label htmlFor={option.value}>{option.label}</label>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
       <form onSubmit={handleUserInput} className="input-form">
         <input

@@ -14,7 +14,7 @@ const Home = () => {
             />
             <h1 class="mt-2 text-center">The best solution for all your scanning needs!</h1>
             <div class="d-flex justify-content-center mt-3">
-                <Link to="/menu">
+                <Link to="/formsList">
                     <Button class="btn-primary">Start Scanning</Button>
                 </Link>
             </div>

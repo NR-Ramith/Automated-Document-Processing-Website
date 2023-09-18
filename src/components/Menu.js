@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import './Menu.css';
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import UploadForm from './UploadForm';
 import axios from 'axios';
 
 const Menu = () => {
 
     const [processedImage, setProcessedImage] = useState(null);
+    const navigate = useNavigate();
+
+    const location = useLocation();
+    let selectedFormId =null;
+    if(location !== null){
+    selectedFormId = location.state.selectedFormId;
+    console.log(selectedFormId);
+    }
     // const path = require('path');
     // const fs = require('fs');
     // const passportImagePath = path.join(__dirname, 'res_image.jpeg');
+    
     const handleImageUpload = async (imageData) => {
         try {
             const response = await axios.post('http://localhost:5000/processImage', {
@@ -42,6 +51,11 @@ const Menu = () => {
         }
     };
 
+    const handleButtonClick = () => {
+        navigate('/chatbot', { state: { selectedFormId: selectedFormId } });
+    };
+    
+
     useEffect(() => {
         console.log('Processed image changed:', processedImage);
     }, [processedImage]);
@@ -59,9 +73,9 @@ const Menu = () => {
                 )}
             </div>
             <p className="no-application">Don't have the filled application form?</p>
-            <Link to="/chatBot" className="chatbot-link">
-                <button className="chatbot-button">Try ChatBot</button>
-            </Link>
+            {/* <Link to={{ pathname: '/chatBot', state: { selectedForm } }} className="chatbot-link"> */}
+                <button onClick={handleButtonClick} className="chatbot-button">Try ChatBot</button>
+            {/* </Link> */}
         </div>
     );
 };
