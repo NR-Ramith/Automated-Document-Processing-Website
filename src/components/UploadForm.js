@@ -6,7 +6,6 @@ function UploadForm({ onImageUpload }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    // console.log(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setImageData(reader.result);
@@ -26,7 +25,7 @@ function UploadForm({ onImageUpload }) {
       <h2>Upload Image</h2>
       <form onSubmit={handleSubmit}>
         <input type="file" accept=".jpg,.jpeg,.png" onChange={handleImageChange} />
-        <button type="submit">Process Image</button>
+        <button className='process-button' type="submit">Process Image</button>
       </form>
     </div>
   );

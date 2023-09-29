@@ -4,7 +4,6 @@ import Header from './Header';
 import Home from './Home';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Menu from './Menu';
-import Temp from './Temp.js';
 import FormsList from './FormsList';
 
 function App() {

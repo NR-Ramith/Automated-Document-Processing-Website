@@ -2,80 +2,77 @@ import React, { useState, useEffect } from 'react';
 import './Menu.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import UploadForm from './UploadForm';
-import axios from 'axios';
 
 const Menu = () => {
-
     const [processedImage, setProcessedImage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false); // New loading state
     const navigate = useNavigate();
-
     const location = useLocation();
-    let selectedFormId =null;
-    if(location !== null){
-    selectedFormId = location.state.selectedFormId;
-    console.log(selectedFormId);
-    }
-    // const path = require('path');
-    // const fs = require('fs');
-    // const passportImagePath = path.join(__dirname, 'res_image.jpeg');
+    let selectedFormId = null;
     
-    const handleImageUpload = async (imageData) => {
-        try {
-            const response = await axios.post('http://localhost:5000/processImage', {
-                imageData,
-            });
-            // console.log(response);
-            // setProcessedImage(response.data);
-            // const processedImageUrl = URL.createObjectURL(response.data);
-            // const fetchresponse = await fetch(response.data); // Replace with the actual path
-            console.log(response);
-            // const imageBlob = await response.data.blob();
-            // setProcessedImage(URL.createObjectURL(imageBlob));
-            const blob = new Blob([response.data], { type: 'image/jpeg' });
-            // saveAs(blob, "my-image.jpeg");
+    if (location !== null) {
+        selectedFormId = location.state.selectedFormId;
+    }
 
-            const blobURL = URL.createObjectURL(blob);
-            console.log(blobURL); // Check the console to see if it's a valid Blob
-            setProcessedImage(blobURL);
-            // Save the buffer as a temporary image
-            // console.log(response);
-            // fs.writeFile(passportImagePath, response, (err) => {
-            //   if (err) {
-            //     console.error(err);
-            //   }});
-            // const buffer = Buffer.from(response.data, 'binary'); // Convert image data to Buffer
-            // const blob = new Blob([response.data], { type: 'image/jpeg' }); // Create Blob from Buffer
-            // setProcessedImage(URL.createObjectURL(blob)); // Convert Blob to URL
+    const handleImageUpload = async (imageData) => {
+        setIsLoading(true); // Set loading state to true when processing starts
+
+        try {
+            const response = await fetch('http://localhost:5000/processImage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageData }), // Assuming imageData is a base64-encoded image
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+
+            // Check if the Blob has a valid type (e.g., image/jpeg, image/png)
+            if (blob.type.startsWith('image/')) {
+                // Create a Blob URL for the image
+                const imageUrl = URL.createObjectURL(blob);
+                setProcessedImage(imageUrl);
+            } else {
+                console.error('Invalid Blob type:', blob.type);
+                // Handle the case where the Blob is not a valid image
+            }
         } catch (error) {
-            console.error(error);
+            console.error('Error fetching image:', error);
+            // Handle the fetch error here
+        } finally {
+            setIsLoading(false); // Set loading state to false when processing is complete
         }
     };
 
     const handleButtonClick = () => {
-        navigate('/chatbot', { state: { selectedFormId: selectedFormId } });
+        handleImageUpload(); // Call the image upload function when the button is clicked
     };
-    
-
-    useEffect(() => {
-        console.log('Processed image changed:', processedImage);
-    }, [processedImage]);
 
     return (
         <div className="menu-container">
             <div className="menu-content">
                 <h1 className="menu-title">Image Processing</h1>
                 <UploadForm onImageUpload={handleImageUpload} />
-                {processedImage && (
+                {isLoading ? (
+                    <div className="loading-spinner-container">
+                        <div className="loading-spinner"></div>
+                    </div>
+                ) : processedImage ? (
                     <div className="processed-image-container">
                         <h2>Processed Image</h2>
                         <img className="processed-image" src={processedImage} alt="Processed" />
                     </div>
-                )}
+                ) : null}
             </div>
             <p className="no-application">Don't have the filled application form?</p>
-            {/* <Link to={{ pathname: '/chatBot', state: { selectedForm } }} className="chatbot-link"> */}
-                <button onClick={handleButtonClick} className="chatbot-button">Try ChatBot</button>
-            {/* </Link> */}
+            <button onClick={handleButtonClick} className="chatbot-button">
+                Try ChatBot
+            </button>
         </div>
     );
 };
