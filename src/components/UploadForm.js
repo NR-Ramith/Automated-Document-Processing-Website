@@ -1,7 +1,7 @@
 // frontend/src/UploadForm.js
 import React, { useState } from 'react';
 
-function UploadForm({ onImageUpload }) {
+function UploadForm({ onImageUpload, fileInputRef }) {
   const [imageData, setImageData] = useState('');
 
   const handleImageChange = (e) => {
@@ -24,7 +24,7 @@ function UploadForm({ onImageUpload }) {
     <div>
       <h2>Upload Image</h2>
       <form onSubmit={handleSubmit}>
-        <input type="file" accept=".jpg,.jpeg,.png" onChange={handleImageChange} />
+        <input type="file" accept=".jpg,.jpeg,.png" onChange={handleImageChange} ref={fileInputRef}/>
         <button className='process-button' type="submit">Process Image</button>
       </form>
     </div>
