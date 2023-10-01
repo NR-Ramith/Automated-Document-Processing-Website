@@ -9,7 +9,7 @@ const Menu = () => {
     const navigate = useNavigate();
     const location = useLocation();
     let selectedFormId = null;
-    
+
     if (location !== null) {
         selectedFormId = location.state.selectedFormId;
     }
@@ -50,7 +50,7 @@ const Menu = () => {
     };
 
     const handleButtonClick = () => {
-        handleImageUpload(); // Call the image upload function when the button is clicked
+        navigate('/chatbot', { state: { selectedFormId: selectedFormId } });
     };
 
     return (
@@ -70,9 +70,7 @@ const Menu = () => {
                 ) : null}
             </div>
             <p className="no-application">Don't have the filled application form?</p>
-            <button onClick={handleButtonClick} className="chatbot-button">
-                Try ChatBot
-            </button>
+            <button onClick={handleButtonClick} className="chatbot-button">Try ChatBot</button>
         </div>
     );
 };
