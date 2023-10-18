@@ -1,20 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import './Menu.css';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import UploadForm from './UploadForm';
+import { getTemplateId } from './values';
 
 const Menu = () => {
     const [processedImageBlob, setProcessedImageBlob] = useState(null);
     const [processedImageURL, setProcessedImageURL] = useState(null);
     const [isLoading, setIsLoading] = useState(false); // New loading state
     const navigate = useNavigate();
-    const location = useLocation();
     const fileInputRef = useRef(null);
-    let selectedFormId = null;
-
-    if (location !== null) {
-        selectedFormId = location.state.selectedFormId;
-    }
+    let selectedFormId = getTemplateId();
 
     const handleImageUpload = async (imageData) => {
         setIsLoading(true); // Set loading state to true when processing starts
@@ -56,38 +52,42 @@ const Menu = () => {
         navigate('/chatbot', { state: { selectedFormId: selectedFormId } });
     };
 
+    const handleScanFormClick = () => {
+        navigate('/getdata');
+    };
+
     const handleImageSubmit = async () => {
         if (processedImageBlob) {
             setIsLoading(true);
-        
-            try {
-              const formData = new FormData();
-              formData.append('image', processedImageBlob);
-        
-              const response = await fetch('http://localhost:5000/uploadImage', {
-                method: 'POST',
-                body: formData,
-              });
-        
-              if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-              }
-        
-              console.log('Image uploaded successfully');
-        
-              // Reset the file input value to clear the selected file
-              fileInputRef.current.value = '';
 
-              // Reset the processedImageBlob and URL after upload
-              setProcessedImageBlob(null);
-              setProcessedImageURL(null);
+            try {
+                const formData = new FormData();
+                formData.append('image', processedImageBlob);
+
+                const response = await fetch('http://localhost:5000/uploadImage', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                console.log('Image uploaded successfully');
+
+                // Reset the file input value to clear the selected file
+                fileInputRef.current.value = '';
+
+                // Reset the processedImageBlob and URL after upload
+                setProcessedImageBlob(null);
+                setProcessedImageURL(null);
             } catch (error) {
-              console.error('Error uploading image:', error);
-              // Handle the fetch error here
+                console.error('Error uploading image:', error);
+                // Handle the fetch error here
             } finally {
-              setIsLoading(false);
+                setIsLoading(false);
             }
-          }
+        }
     };
 
     return (
@@ -107,6 +107,7 @@ const Menu = () => {
                     </div>
                 ) : null}
             </div>
+            <button onClick={handleScanFormClick} className="scan-form-button">Scan Form</button>
             <p className="no-application">Don't have the filled application form?</p>
             <button onClick={handleButtonClick} className="chatbot-button">Try ChatBot</button>
         </div>

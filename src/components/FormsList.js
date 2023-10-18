@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './FormsList.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { setTemplateId } from './values';
 
 const FormsList = () => {
     const [selectedForm, setSelectedForm] = useState(null);
@@ -29,12 +30,13 @@ const FormsList = () => {
             frontImage: require('../images/form3-1.jpeg'),
             images: [require('../images/form3-1.jpeg')],
         },
-        // {
-        //     name: 'Form 4',
-        //     description: 'Description for Form 1',
-        //     frontImage: require('../images/pew.jpeg'),
-        //     images: ['url_to_image_1', 'url_to_image_2', 'url_to_image_3'],
-        // },
+        {
+            id: 8,
+            name: 'Karvy8',
+            description: 'Karvy Form',
+            frontImage: require('../images/form4-1.jpg'),
+            images: [require('../images/form4-1.jpg')],
+        },
         // {
         //     name: 'Form 5',
         //     description: 'Description for Form 1',
@@ -46,14 +48,17 @@ const FormsList = () => {
 
     const handleFormClick = (form) => {
         setSelectedForm(form);
+        setTemplateId(form.id);
     };
 
     const handleBackButtonClick = () => {
         setSelectedForm(null);
+        setTemplateId(0);
     };
 
     const handleFillButtonClick = (form) => {
         setSelectedForm(form);
+        setTemplateId(form.id);
         navigate('/menu', { state: { selectedFormId: form.id } }); // Use navigate() for navigation
     };
 
@@ -88,7 +93,6 @@ const FormsList = () => {
                                     <h3>{form.name}</h3>
                                     <p>{form.description}</p>
                                     <div className="buttons">
-                                        {/* Only the button div is clickable */}
                                         <div onClick={() => handleFormClick(form)} className="button preview-button">
                                             Preview
                                         </div>

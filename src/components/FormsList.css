@@ -23,7 +23,7 @@
     justify-content: space-between;
     width: 100%;
 }
-  
+
 .form-card {
     display: flex;
     height: fit-content;
@@ -42,28 +42,28 @@
 .form-card:hover {
     transform: scale(1.05);
 }
-  
+
 .form-preview img {
     width: 100px;
     height: 100px;
     object-fit: cover;
     margin-right: 20px;
 }
-  
+
 .form-details {
     flex-grow: 1;
 }
-  
+
 .form-details h3 {
     margin: 0;
     font-size: 1.5rem;
 }
-  
+
 .form-details p {
     margin: 10px 0;
     font-size: 1rem;
 }
-  
+
 .buttons {
     display: flex;
     gap: 10px;
@@ -78,6 +78,7 @@
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
 }
+
 .button:hover {
     background-color: #007bff;
     color: #fff;

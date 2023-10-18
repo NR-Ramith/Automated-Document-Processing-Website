@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
-import questions from "./questions";
 import { isValidDateFormat, isValidDate, hasOnlyAlphabets, hasOnlyDigits, hasFieldLength, isValidEmailFormat, toTitle } from './validate';
 
 const ChatBot = () => {
@@ -13,12 +12,31 @@ const ChatBot = () => {
   const [userInputs, setUserInputs] = useState([]);
   const [inputs, setInputs] = useState([]);
   const [lastQuestionValue, setLastQuestionValue] = useState('');
+  const [questions, setQuestions] = useState([]);
+  let currentQuestion = {};
 
   const location = useLocation();
   let selectedFormId = null;
-  if (location !== null) {
-    selectedFormId = location.state.selectedFormId;
-  }
+
+  useEffect(() => {
+    // Fetch questions when the component mounts or when selectedFormId changes
+    if (location.state && location.state.selectedFormId) {
+      const formId = location.state.selectedFormId;
+      selectedFormId = formId;
+
+      axios.get(`http://localhost:3001/getQuestions/${formId}`)
+        .then((response) => {
+          setQuestions(response.data);
+          currentQuestion = response.data[currentQuestionIndex];
+          setMessages([...messages, { text: currentQuestion.text, isUser: false }]);
+          readOutText(currentQuestion.text);
+        })
+        .catch((error) => {
+          // Handle errors, e.g., questions not found for the selected form ID
+          console.error('Error fetching questions:', error);
+        });
+    }
+  }, [location.state]);
 
   const handleVoiceInput = (event) => {
     const transcript = event.results[0][0].transcript;
@@ -55,9 +73,9 @@ const ChatBot = () => {
 
   const askNextQuestion = () => {
     // Check if there are more questions in the selected form
-    if (currentQuestionIndex + 1 < questions[selectedFormId].length) {
+    if (currentQuestionIndex + 1 < questions.length) {
       // Get the next question
-      const nextQuestion = questions[selectedFormId][currentQuestionIndex + 1];
+      const nextQuestion = questions[currentQuestionIndex + 1];
 
       // Create a message for the next question
       const nextQuestionMessage = { text: nextQuestion.text, isUser: false };
@@ -88,7 +106,7 @@ const ChatBot = () => {
     let userInput = voiceInput || inputRef.current.value; // Use voiceInput if available, otherwise use text input
     // Remove trailing full stop if it exists
     userInput = userInput.replace(/\.$/, '');
-    const currentQuestion = questions[selectedFormId][currentQuestionIndex];
+    const currentQuestion = questions[currentQuestionIndex];
     let updatedMessages = [];
 
     userInput = userInput.trim(); // Remove leading and trailing whitespace
@@ -235,13 +253,6 @@ const ChatBot = () => {
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }, [messages]);
 
-  useEffect(() => {
-    // Ask the initial question when the component mounts
-    const currentQuestion = questions[selectedFormId][currentQuestionIndex];
-    setMessages([...messages, { text: currentQuestion.text, isUser: false }]);
-    readOutText(currentQuestion.text); // Read out the initial question
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <div className="chatbot-container">
       <div className="chatbot-header">
@@ -273,9 +284,9 @@ const ChatBot = () => {
             ))}
           </div>
         )}
-        {questions[selectedFormId][currentQuestionIndex].options ? (
+        {questions[currentQuestionIndex] && questions[currentQuestionIndex].options ? (
           <div className="checkbox-options">
-            {questions[selectedFormId][currentQuestionIndex].options.map((option) => (
+            {questions[currentQuestionIndex].options.map((option) => (
               <div key={option.value} className="checkbox-option">
                 <input
                   type="checkbox"
@@ -285,13 +296,13 @@ const ChatBot = () => {
                   checked={false}
                   onChange={() => {
                     // setCheckboxValue(option.value);
-                    setInputs([...inputs, { fieldName: questions[selectedFormId][currentQuestionIndex].field, val: option.value }]);
+                    setInputs([...inputs, { fieldName: questions[currentQuestionIndex].field, val: option.value }]);
                     const checkboxMessage = {
                       text: option.value,
                       isUser: true,
                     };
                     setMessages([...messages, checkboxMessage]);
-                    if (questions[selectedFormId][currentQuestionIndex].last === true)
+                    if (questions[currentQuestionIndex].last === true)
                       setLastQuestionValue('Empty');
                     askNextQuestion();
                   }}
