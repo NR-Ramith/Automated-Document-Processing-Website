@@ -15,6 +15,9 @@ import ShowData from './ShowData';
 import GetData from './GetData';
 import PersistentDrawerLeft from './PersistentDrawerLeft';
 import ViewData from './ViewData';
+import NewTemplateMenu from './NewTemplateMenu';
+import AddChatbotFields from './AddChatbotFields';
+import CreateFormEntry from './CreateFormEntry';
 
 
 class App extends Component {
@@ -80,6 +83,21 @@ class App extends Component {
             <Route exact path='/formsList' element={<>
               <Header />
               <FormsList />
+            </>}>
+            </Route>
+            <Route exact path='/createFormEntry' element={<>
+              <Header />
+              <CreateFormEntry />
+            </>}>
+            </Route>
+            <Route exact path='/createNewTemplate' element={<>
+              <Header />
+              <NewTemplateMenu />
+            </>}>
+            </Route>
+            <Route exact path='/addChatbotFields' element={<>
+              <Header />
+              <AddChatbotFields />
             </>}>
             </Route>
             <Route exact path='/menu' element={<>

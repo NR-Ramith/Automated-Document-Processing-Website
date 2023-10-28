@@ -1,3 +1,16 @@
+.back-button {
+  position: absolute;
+  top: 8vh;
+  left: 4vh;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
 .menu-container {
   justify-content: center;
   align-items: center;
@@ -9,7 +22,7 @@
 .menu-content {
   background-color: white;
   border-radius: 10px;
-  padding: 20px;
+  padding: 20px 10vh;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
   width: fit-content;

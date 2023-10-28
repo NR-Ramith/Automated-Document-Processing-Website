@@ -8,6 +8,7 @@ import Button from '@material-ui/core/Button';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import withStyles from '@material-ui/core/styles/withStyles';
 import axios from './axios-object';
+import { getNewTemplateId } from './values';
 
 const styles = theme => ({
   button: {
@@ -29,7 +30,7 @@ class MarkTemp extends Component {
     super();
     this.state = {
       idCount: 0,
-      data: {},
+      data: {tid: getNewTemplateId()},
       image: null
     }
   }
@@ -117,14 +118,13 @@ class MarkTemp extends Component {
 
   submitFormHandler = () => {
     var keys_list = Object.keys(this.state.data)
-    console.log(this.state.data)
     if (keys_list.length === 0 || this.state.data[keys_list[0]]['templateName'] === null)
       return
 
     let image = new FormData();
     image.append('image', this.state.image);
 
-    axios.post('/submit/', JSON.stringify(this.state.data))
+    axios.post('/createMarkTemplate/', JSON.stringify(this.state.data))
       .then(response => {
         let data = response.data;
         axios.post('/submitimage/' + data.tid, image)

@@ -1,3 +1,13 @@
+let newTemplateId = 0;
+
+export const getNewTemplateId = () => {
+  return newTemplateId;
+};
+
+export const setNewTemplateId = (newTId) => {
+  newTemplateId = newTId;
+};
+
 let templateId = 0;
 
 export const getTemplateId = () => {

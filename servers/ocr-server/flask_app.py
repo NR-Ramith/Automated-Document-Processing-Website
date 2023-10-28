@@ -214,6 +214,87 @@ def submit_template():
     resp.status_code = 200
     return resp
 
+@app.route("/createMarkTemplate/",methods=['POST'])
+def createMarkTemplate():
+    fields = request.get_json(force = True)
+    print('fields are -' ,fields)
+    # fields are : {'0': {'fieldname': 'q', 'desc': 'q', 'boxcount': None, 'type': 'Text', 'left_x': 528, 'right_x':703, 'top_y': 231, 'bottom_y': 266, 'image_width': 1349, 'image_height': 1568, 'templateName': 'wq', 'username': 'admin', 'templateDesc': 'qw'}}
+    tid=request.data.tid
+    template = Template()
+    template.userid = tid
+    template.name = fields['0']['templateName']
+    if 'templateDesc' in fields['0']:
+        template.description = fields['0']['templateDesc']
+    template.createdon = datetime.datetime.today().strftime('%Y-%m-%d')
+    sqlsession.add(template)
+    sqlsession.flush()
+
+    tid = template.id
+    sqlsession.commit()
+
+    attr_dict = {'__tablename__' : tid, 'id' : Column('id', Integer, Sequence('user_id_seq'), primary_key=True)} #
+
+    cnt = 1
+    for fid,finfo in fields.items():
+        field = Field()
+        field.name = finfo['fieldname']
+        field.description = finfo['desc']
+        field.boxcount = finfo['boxcount']
+        field.Type = finfo['type']
+        field.leftx = finfo['left_x']
+        field.rightx = finfo['right_x']
+        field.topy = finfo['top_y']
+        field.bottomy = finfo['bottom_y']
+        field.percentleftx = finfo['left_x']/finfo['image_width'] * 100
+        field.percentrightx = finfo['right_x']/finfo['image_width'] * 100
+        field.percenttopy = finfo['top_y']/finfo['image_height'] * 100
+        field.percentbottomy = finfo['bottom_y']/finfo['image_height'] * 100
+        field.userid = tid
+        field.markedon = datetime.datetime.today().strftime('%Y-%m-%d')
+        field.templateid = tid
+        if cnt == 1:
+            field.anchor = True
+        else:
+            field.anchor = False
+        cnt+=1
+        sqlsession.add(field)
+
+        attr_dict[field.name] = Column(String(255))
+
+    #create table for each template with name as their template id
+    MyTableClass = type('MyTableClass', (Base,), attr_dict)
+    Base.metadata.create_all(engine) 
+
+    sqlsession.commit()
+    resp = jsonify({"error":None,"tid":tid})
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    resp.status_code = 200
+    return resp
+
+newTemplateId=9
+
+@app.route("/getCurrentNewTemplateId",methods=['GET'])
+def get_current_new_template_id():
+    response = app.response_class(
+        response = json.dumps(newTemplateId, cls=AlchemyEncoder),
+        mimetype='application/json'
+    )
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.status_code = 200
+    return response
+
+@app.route("/getNewTemplateId",methods=['GET'])
+def get_new_template_id():
+    global newTemplateId
+    newTemplateId+=1
+    response = app.response_class(
+        response = json.dumps(newTemplateId, cls=AlchemyEncoder),
+        mimetype='application/json'
+    )
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.status_code = 200
+    return response
+
 @app.route("/prevTemplates/",methods=['POST'])
 def prev_templates():
     username = request.get_json(force=True)

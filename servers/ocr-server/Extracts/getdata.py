@@ -7,10 +7,13 @@ import json
 import math
 import os
 from recognizer import *
+import pytesseract
+import easyocr
 
 REGISTERED_IMAGE = './temp/finalimage.png'
 UPLOAD_FOLDER = './temp/blocks'
 DATABASE = './user.db'
+# pytesseract.pytesseract.tesseract_cmd = ""
 
 def create_connection(filename):
     try:
@@ -54,6 +57,17 @@ def get_data(tid,model,mapping):
 
         block = im[y1:y2,x1:x2]
         cv2.imwrite(os.path.join(UPLOAD_FOLDER,"{}.png".format(id)),block)
+        text = pytesseract.image_to_string(block, lang = 'eng')
+        print('pytesseract prediction -', text)
+        # Initialize the EasyOCR reader
+        # reader = easyocr.Reader(['en'], gpu=False)
+        # results = reader.readtext(block)
+        # eocrtext=''
+        # for (bbox, text, prob) in results:
+        #     eocrtext+=text
+        # print('easyocr prediction -', eocrtext)
+        text_without_spaces = "".join([char for char in text if char != ' '])
+        print(text_without_spaces)
 
         block_height = block.shape[0]
         block_width = block.shape[1]
@@ -66,7 +80,13 @@ def get_data(tid,model,mapping):
 
             box = block[0:block_height, s:e]
             cv2.imwrite(os.path.join(UPLOAD_FOLDER,"{}.png".format(str(id)+" "+str(i))), box)
-            data+=predict(box,model,mapping)
+            # data+=predict(box,model,mapping)
+            data+=pytesseract.image_to_string(box, lang = 'eng')
+            # eocrres = reader.readtext(box)
+            # print(eocrres)
+            # for (bbox, text, prob) in eocrres:
+            #     data+=text
+
         print(data)
         
         columndata.append(data)

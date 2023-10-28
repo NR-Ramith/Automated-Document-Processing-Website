@@ -104,13 +104,10 @@ class PersistentDrawerLeft extends Component {
   };
 
   render() {
-    // console.log(this.props);
     const { classes, theme } = this.props;
     const { open } = this.state;
-    // console.log(open)
     let handleClick = this.handleClick;
     let vals = this.props.options;
-    // console.log(vals)
 
     return (
       <div className={classes.root}>

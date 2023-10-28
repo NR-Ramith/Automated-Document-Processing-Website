@@ -90,8 +90,13 @@ const Menu = () => {
         }
     };
 
+    const goBack = () => {
+        navigate('/formsList');
+    };
+
     return (
         <div className="menu-container">
+            <button onClick={goBack} className="back-button">&lt; Back</button>
             <div className="menu-content">
                 <h1 className="menu-title">Image Processing</h1>
                 <UploadForm onImageUpload={handleImageUpload} fileInputRef={fileInputRef} />
