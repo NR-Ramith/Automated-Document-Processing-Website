@@ -157,7 +157,8 @@ def submit_form(tid=None):
 
 @app.route("/submit/",methods=['POST'])
 def submit_template():
-    fields = request.get_json(force = True)
+    reqbody = request.get_json(force = True)
+    fields = reqbody['data']
     print('fields are -' ,fields)
     # fields are : {'0': {'fieldname': 'q', 'desc': 'q', 'boxcount': None, 'type': 'Text', 'left_x': 528, 'right_x':703, 'top_y': 231, 'bottom_y': 266, 'image_width': 1349, 'image_height': 1568, 'templateName': 'wq', 'username': 'admin', 'templateDesc': 'qw'}}
     template = Template()
@@ -172,7 +173,7 @@ def submit_template():
     sqlsession.add(template)
     sqlsession.flush()
 
-    tid = template.id
+    tid = reqbody['tid']
     sqlsession.commit()
 
     attr_dict = {'__tablename__' : tid, 'id' : Column('id', Integer, Sequence('user_id_seq'), primary_key=True)} #
@@ -216,10 +217,11 @@ def submit_template():
 
 @app.route("/createMarkTemplate/",methods=['POST'])
 def createMarkTemplate():
-    fields = request.get_json(force = True)
+    reqbody = request.get_json(force = True)
+    fields = reqbody['data']
     print('fields are -' ,fields)
     # fields are : {'0': {'fieldname': 'q', 'desc': 'q', 'boxcount': None, 'type': 'Text', 'left_x': 528, 'right_x':703, 'top_y': 231, 'bottom_y': 266, 'image_width': 1349, 'image_height': 1568, 'templateName': 'wq', 'username': 'admin', 'templateDesc': 'qw'}}
-    tid=request.data.tid
+    tid=reqbody['tid']
     template = Template()
     template.userid = tid
     template.name = fields['0']['templateName']

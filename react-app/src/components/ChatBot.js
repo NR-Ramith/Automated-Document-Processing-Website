@@ -127,7 +127,7 @@ const ChatBot = () => {
       }
 
       // If user input is empty, just move to the next question
-      if (currentQuestion.last === true)
+      if (currentQuestionIndex === questions.length-1)
         setLastQuestionValue('Empty');
       askNextQuestion();
       return; // Skip further processing
@@ -198,7 +198,7 @@ const ChatBot = () => {
     }
     if (userInput) {
       setInputs([...inputs, { fieldName: currentQuestion.field, val: userInput }]);
-      if (currentQuestion.last === true)
+      if (currentQuestionIndex === questions.length-1)
         setLastQuestionValue(userInput);
 
       // Add the user's input to the messages
@@ -306,7 +306,7 @@ const ChatBot = () => {
                         isUser: true,
                       };
                       setMessages([...messages, checkboxMessage]);
-                      if (questions[currentQuestionIndex].last === true)
+                      if (currentQuestionIndex === questions.length-1)
                         setLastQuestionValue('Empty');
                       askNextQuestion();
                     }}

@@ -215,7 +215,6 @@ const questions = {
       id: 59,
       text: 'The details of credit are under..?',
       field: 'creditUnder',
-      last: true,
       options: [
         { value: 'vehicleLoan', label: 'Vehicle Loan' },
         { value: 'houseingLoan', label: 'Housing Loan' },
@@ -242,7 +241,7 @@ const questions = {
     { id: 13, text: 'What is your state?', field: 'state', callValidations: ['onlyAlphabets'] },
     { id: 14, text: 'What is your nationality?', field: 'nationality', callValidations: ['onlyAlphabets'] },
     { id: 15, text: 'What is your pin code?', field: 'pinCode', fieldLength: 6, callValidations: ['onlyDigits','fixedLength'] },
-    { id: 11, text: 'What is your address?', field: 'address', last:true },
+    { id: 11, text: 'What is your address?', field: 'address' },
   ],
 };
 

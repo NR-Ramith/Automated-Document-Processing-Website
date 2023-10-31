@@ -21,6 +21,16 @@ const CreateFormEntry = () => {
     setImages([...images, ...selectedImages]);
   };
 
+  const removeFrontImage = () => {
+    setFrontImage(null);
+  };
+
+  const removeImage = (index) => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+  };
+
   const goBack = () => {
     navigate('/createNewTemplate');
   };
@@ -45,6 +55,7 @@ const CreateFormEntry = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
+      alert('Form entry has been made.');
 
       // After successful submission, navigate to /createNewTemplate
       navigate('/createNewTemplate');
@@ -58,7 +69,6 @@ const CreateFormEntry = () => {
       <button onClick={goBack} className="back-button">&lt; Back</button>
       <div className="create-form-container">
         <form onSubmit={handleSubmit}>
-
           <div className="form-group">
             <label htmlFor="name" className="form-label">
               Name:
@@ -90,6 +100,17 @@ const CreateFormEntry = () => {
             <label htmlFor="frontImage" className="file-label">Upload Front Image</label>
           </div>
 
+          {frontImage && (
+            <div className="selected-images">
+              <div className="selected-image">
+                <span>{frontImage.name}</span>
+                <button className="remove-button" onClick={removeFrontImage}>
+                  X
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="form-group">
             <label htmlFor="images" className="form-label">
               Images:
@@ -102,6 +123,17 @@ const CreateFormEntry = () => {
               onChange={handleImagesChange}
             />
             <label htmlFor="images" className="file-label">Upload Images</label>
+          </div>
+
+          <div className="selected-images">
+            {images.map((image, index) => (
+              <div className="selected-image" key={index}>
+                <span>{image.name}</span>
+                <button className="remove-button" onClick={() => removeImage(index)}>
+                  X
+                </button>
+              </div>
+            ))}
           </div>
 
           <button type="submit" className="submit-button">Submit Form Entry</button>

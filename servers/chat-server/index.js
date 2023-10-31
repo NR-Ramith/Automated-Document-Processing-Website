@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const questions = require('./questions');
+const Question = require('./models/questions.js');
 const fs = require('fs');
 const Form = require('./models/form');
 const multer = require('multer');
@@ -131,35 +131,40 @@ app.post('/makeFormEntry', upload.fields([{ name: 'frontImage' }, { name: 'image
   }
 });
 
-app.post('/submitTemplateQuestions', (req, res) => {
+app.post('/submitTemplateQuestions', async (req, res) => {
   // Get data from the request
   const data = req.body;
 
-  // Extract the key and value from the request
-  const k = data[0];
-  const v = data[1];
+  try {
+    // Create a new record in the MongoDB questions table
+    const newQuestion = new Question({ formId: data[0], questions: data[1] });
+    await newQuestion.save();
 
-  // Append the key-value pair to the questions object
-  questions[k] = v;
-
-  // Convert the new data to a JSON string
-  // const newDataString = JSON.stringify({k:v}, null, 2);
-  const newDataString = JSON.stringify(questions, null, 2);
-
-  // Write the updated data back to questions.js
-  fs.writeFileSync('questions.js', `const questions = ${newDataString};\nmodule.exports = questions;`);
-
-  return res.status(200).json({ message: 'Template questions submitted successfully' });
+    return res.status(200).json({ message: 'Template questions submitted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error while submitting template questions' });
+  }
 });
 
-app.get('/getQuestions/:selectedFormId', (req, res) => {
+app.get('/getQuestions/:selectedFormId', async (req, res) => {
   const selectedFormId = req.params.selectedFormId;
-  if (questions[selectedFormId]) {
-    // If questions for the selected form ID exist, send it to the client.
-    res.send(questions[selectedFormId]);
-  } else {
-    // Handle the case where the selected form ID is not found.
-    res.status(404).send('Questions not found for the selected form ID');
+
+  try {
+    // Use Mongoose to find a document with the matching formId
+    const form = await Question.findOne({ "formId": Number(selectedFormId) });
+
+    if (form) {
+      // If a matching document is found, return the 'questions' attribute
+      res.send(form.questions);
+    } else {
+      // Handle the case where the selected form ID is not found.
+      res.status(404).send('Questions not found for the selected form ID');
+    }
+  } catch (error) {
+    // Handle any errors that may occur during the query.
+    console.error('Error:', error);
+    res.status(500).send('Internal server error');
   }
 });
 

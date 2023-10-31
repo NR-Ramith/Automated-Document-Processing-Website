@@ -30,7 +30,7 @@ class MarkTemp extends Component {
     super();
     this.state = {
       idCount: 0,
-      data: {tid: getNewTemplateId()},
+      data: {},
       image: null
     }
   }
@@ -116,7 +116,7 @@ class MarkTemp extends Component {
     })
   }
 
-  submitFormHandler = () => {
+  submitFormHandler = async () => {
     var keys_list = Object.keys(this.state.data)
     if (keys_list.length === 0 || this.state.data[keys_list[0]]['templateName'] === null)
       return
@@ -124,7 +124,7 @@ class MarkTemp extends Component {
     let image = new FormData();
     image.append('image', this.state.image);
 
-    axios.post('/createMarkTemplate/', JSON.stringify(this.state.data))
+    axios.post('/createMarkTemplate/', JSON.stringify({'tid': getNewTemplateId(),'data': this.state.data}))
       .then(response => {
         let data = response.data;
         axios.post('/submitimage/' + data.tid, image)

@@ -15,7 +15,7 @@ const NewTemplateMenu = () => {
 
     const handleGetNewTemplateId = () => {
         axios.get('/getNewTemplateId')
-            .then(response => setNewTemplateId(response.data))
+            .then(response => {setNewTemplateId(response.data); alert('Received Template Id - '+response.data);})
             .catch(error => console.error('Error fetching data:', error));
     };
 
