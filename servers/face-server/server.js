@@ -32,7 +32,7 @@ const storage = multer.memoryStorage(); // Store the image data in memory
 const upload = multer({ storage: storage });
 
 app.post('/processImage', async (req, res) => {
-  const { imageData } = req.body;
+  const { imageData, backgroundColor } = req.body;
 
   // Extract the base64 image data from the data URI
   const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
@@ -49,7 +49,7 @@ app.post('/processImage', async (req, res) => {
 
     const options = {
       scriptPath: path.join(__dirname),
-      args: [tempImagePath, processedImagePath], // Pass the temporary image path as an argument
+      args: [tempImagePath, processedImagePath, backgroundColor], // Pass the temporary image path as an argument
     };
 
     // Run the Python script to process the image

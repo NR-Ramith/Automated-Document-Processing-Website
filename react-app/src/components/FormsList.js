@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './FormsList.css';
 import { useNavigate } from 'react-router-dom';
-import { setTemplateId } from './values';
+import { resetFieldValues, resetFilledMandatoryFieldIndicator, resetStateValues, setStateValue, setTemplateId, setDId } from './values';
 import axios from 'axios';
 
 const FormsList = () => {
@@ -10,6 +10,13 @@ const FormsList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        resetStateValues();
+        setTemplateId(0);
+        setDId(0);
+        resetFieldValues();
+        resetFilledMandatoryFieldIndicator();
+        setStateValue('fetchedQuestions',0);
+        setStateValue('questions', []);
         axios.get('http://localhost:3001/getForms')
             .then(response => setForms(response.data))
             .catch(error => console.error('Error fetching forms:', error));

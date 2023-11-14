@@ -1,5 +1,6 @@
 import sys
 sys.path.insert(0, './OCR')
+# sys.path.append('..../react-app/src/components')
 import cv2
 import sqlite3
 from sqlite3 import Error
@@ -9,6 +10,7 @@ import os
 from recognizer import *
 import pytesseract
 import easyocr
+# from values import Field
 
 REGISTERED_IMAGE = './temp/finalimage.png'
 UPLOAD_FOLDER = './temp/blocks'
@@ -24,7 +26,7 @@ def create_connection(filename):
     return none
     
 
-def get_data(tid,model,mapping):
+def get_data(tid,model,mapping,fieldValues):
     conn = create_connection(DATABASE)
     cur = conn.cursor()
     cur.execute("SELECT * FROM field WHERE templateid is "+tid)
@@ -57,41 +59,52 @@ def get_data(tid,model,mapping):
 
         block = im[y1:y2,x1:x2]
         cv2.imwrite(os.path.join(UPLOAD_FOLDER,"{}.png".format(id)),block)
-        text = pytesseract.image_to_string(block, lang = 'eng')
-        print('pytesseract prediction -', text)
-        # Initialize the EasyOCR reader
-        # reader = easyocr.Reader(['en'], gpu=False)
-        # results = reader.readtext(block)
-        # eocrtext=''
-        # for (bbox, text, prob) in results:
-        #     eocrtext+=text
-        # print('easyocr prediction -', eocrtext)
-        text_without_spaces = "".join([char for char in text if char != ' '])
-        print(text_without_spaces)
+        if row[2]=="Text":
+            text = pytesseract.image_to_string(block, lang = 'eng')
+            print('pytesseract prediction -', text)
+            # Initialize the EasyOCR reader
+            # reader = easyocr.Reader(['en'], gpu=False)
+            # results = reader.readtext(block)
+            # eocrtext=''
+            # for (bbox, text, prob) in results:
+            #     eocrtext+=text
+            # print('easyocr prediction -', eocrtext)
+            text_without_spaces = "".join([char for char in text if char != ' '])
+            if text_without_spaces:
+                fieldValues[row[1]]=text_without_spaces
+            print(text_without_spaces)
 
-        block_height = block.shape[0]
-        block_width = block.shape[1]
-        box_width = block_width/ box_count
+            block_height = block.shape[0]
+            block_width = block.shape[1]
+            box_width = block_width/ box_count
 
-        data = ""
-        for i in range(box_count):
-            s = round(i*box_width)
-            e = round((i+1)*box_width)
+            data = ""
+            for i in range(box_count):
+                s = round(i*box_width)
+                e = round((i+1)*box_width)
 
-            box = block[0:block_height, s:e]
-            cv2.imwrite(os.path.join(UPLOAD_FOLDER,"{}.png".format(str(id)+" "+str(i))), box)
-            # data+=predict(box,model,mapping)
-            data+=pytesseract.image_to_string(box, lang = 'eng')
-            # eocrres = reader.readtext(box)
-            # print(eocrres)
-            # for (bbox, text, prob) in eocrres:
-            #     data+=text
+                box = block[0:block_height, s:e]
+                cv2.imwrite(os.path.join(UPLOAD_FOLDER,"{}.png".format(str(id)+" "+str(i))), box)
+                # data+=predict(box,model,mapping)
+                data+=pytesseract.image_to_string(box, lang = 'eng')
+                # eocrres = reader.readtext(box)
+                # print(eocrres)
+                # for (bbox, text, prob) in eocrres:
+                #     data+=text
 
-        print(data)
-        
-        columndata.append(data)
-    print(columns)
-    print(columndata)
+            print(data)
+            
+            columndata.append(data)
+        elif row[2]=="Signature":
+            # Convert the image data to base64
+            _, signature_data = cv2.imencode('.png', block)
+            signature_base64 = base64.b64encode(signature_data).decode('utf-8')
+
+            # Include the base64 string in the data to be sent
+            fieldValues[row[1]]=signature_base64
+            columndata.append(signature_base64)
+    # print(columns)
+    # print(columndata)
     sql = 'INSERT INTO "'+str(tid)+'"("'+'","'.join(columns)+'") values('+",".join(["?"]*len(columns))+')'
     print(sql)
     cur.execute(sql,tuple(columndata))

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
-import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { isValidDateFormat, isValidDate, hasOnlyAlphabets, hasOnlyDigits, hasFieldLength, isValidEmailFormat, toTitle } from './validate';
+import { getFieldValue, getStateValue, setFieldValue, setFilledMandatoryFieldIndicator, setStateValue } from './values';
 
 const ChatBot = () => {
   const [messages, setMessages] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  // const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  // let currentQuestionIndex=0;
   const [voiceInput, setVoiceInput] = useState('');
   const inputRef = useRef(null);
   const [userInputs, setUserInputs] = useState([]);
@@ -18,24 +19,41 @@ const ChatBot = () => {
   const navigate = useNavigate();
   const location = useLocation();
   let selectedFormId = null;
+  let doneFlag = 0;
 
   useEffect(() => {
     // Fetch questions when the component mounts or when selectedFormId changes
     if (location.state && location.state.selectedFormId) {
       const formId = location.state.selectedFormId;
       selectedFormId = formId;
-
-      axios.get(`http://localhost:3001/getQuestions/${formId}`)
-        .then((response) => {
-          setQuestions(response.data);
-          currentQuestion = response.data[currentQuestionIndex];
+      setStateValue('currentQuestionIndex', 0);
+      setQuestions(getStateValue('questions'));
+      let tempQuestions = getStateValue('questions');
+      let i = 0;
+      for (i = 0; i < tempQuestions.length; i++) {
+        if (!getFieldValue(tempQuestions[i]['field'])) {
+          currentQuestion = tempQuestions[i];
+          // setCurrentQuestionIndex(i);
+          // currentQuestionIndex=i;
+          setStateValue('currentQuestionIndex', i);
           setMessages([...messages, { text: currentQuestion.text, isUser: false }]);
           readOutText(currentQuestion.text);
-        })
-        .catch((error) => {
-          // Handle errors, e.g., questions not found for the selected form ID
-          console.error('Error fetching questions:', error);
-        });
+          return;
+        }
+      }
+      // If all the questions are filled
+      if (i === tempQuestions.length) {
+        const endMessage = {
+          text: 'Everything is filled. Thank you for the conversation!',
+          isUser: false,
+        };
+        // setMessages([...messages, endMessage]);
+        setMessages((messages) => [...messages, endMessage]);
+        doneFlag = 1;
+        // setCurrentQuestionIndex(0); // Reset to the initial question for future conversations
+        readOutText(endMessage.text);
+      }
+
     }
   }, [location.state]);
 
@@ -76,31 +94,32 @@ const ChatBot = () => {
   };
 
   const askNextQuestion = () => {
-    // Check if there are more questions in the selected form
-    if (currentQuestionIndex + 1 < questions.length) {
-      // Get the next question
-      const nextQuestion = questions[currentQuestionIndex + 1];
-
-      // Create a message for the next question
-      const nextQuestionMessage = { text: nextQuestion.text, isUser: false };
-
-      // Update the state with the new question and messages
-      setMessages((messages) => [...messages, nextQuestionMessage]);
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-
-      // Read out the next question
-      readOutText(nextQuestion.text);
-    } else {
-      // Conversation ended, you can handle this however you want
-      const endMessage = {
-        text: 'Thank you for the conversation!\n Enter your Name',
-        isUser: false,
-      };
-      // setMessages([...messages, endMessage]);
-      setMessages((messages) => [...messages, endMessage]);
-      setCurrentQuestionIndex(0); // Reset to the initial question for future conversations
-      readOutText(endMessage.text);
+    while (getStateValue('currentQuestionIndex') + 1 < questions.length) {
+      const nextQuestion = questions[getStateValue('currentQuestionIndex') + 1];
+      // Check if the question is already filled
+      if (getFieldValue(nextQuestion.field)==null) {
+        // If the question is filled, assign it as the next question and read it out
+        const nextQuestionMessage = { text: nextQuestion.text, isUser: false };
+        setMessages((messages) => [...messages, nextQuestionMessage]);
+        readOutText(nextQuestion.text);
+        // setCurrentQuestionIndex(currentQuestionIndex + 1);
+        // currentQuestionIndex+=1;
+        setStateValue('currentQuestionIndex', getStateValue('currentQuestionIndex')+1);
+        return;
+      } else {
+        // setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setStateValue('currentQuestionIndex', getStateValue('currentQuestionIndex')+1);
+      }
     }
+    const endMessage = {
+      text: 'Thank you for the conversation!',
+      isUser: false,
+    };
+    // setMessages([...messages, endMessage]);
+    setMessages((messages) => [...messages, endMessage]);
+    doneFlag = 1;
+    // setCurrentQuestionIndex(0); // Reset to the initial question for future conversations
+    readOutText(endMessage.text);
   };
 
 
@@ -110,11 +129,10 @@ const ChatBot = () => {
     let userInput = voiceInput || inputRef.current.value; // Use voiceInput if available, otherwise use text input
     // Remove trailing full stop if it exists
     userInput = userInput.replace(/\.$/, '');
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = questions[getStateValue('currentQuestionIndex')];
     let updatedMessages = [];
 
     userInput = userInput.trim(); // Remove leading and trailing whitespace
-
     if (userInput === "") {
       // If field is mandatory
       if (currentQuestion.mandatory) {
@@ -127,7 +145,7 @@ const ChatBot = () => {
       }
 
       // If user input is empty, just move to the next question
-      if (currentQuestionIndex === questions.length-1)
+      if (getStateValue('currentQuestionIndex') === questions.length - 1)
         setLastQuestionValue('Empty');
       askNextQuestion();
       return; // Skip further processing
@@ -197,8 +215,11 @@ const ChatBot = () => {
       return; // Exit the handleUserInput function if validation failed
     }
     if (userInput) {
+      setFieldValue(currentQuestion.field, userInput);
+      if (currentQuestion.mandatory)
+        setFilledMandatoryFieldIndicator(currentQuestion.field, 1);
       setInputs([...inputs, { fieldName: currentQuestion.field, val: userInput }]);
-      if (currentQuestionIndex === questions.length-1)
+      if (getStateValue('currentQuestionIndex') === questions.length - 1)
         setLastQuestionValue(userInput);
 
       // Add the user's input to the messages
@@ -219,6 +240,31 @@ const ChatBot = () => {
   useEffect(() => {
     if (lastQuestionValue || lastQuestionValue === 'Empty') {
       // Send the user input to the server
+      // const sendUserInput = async () => {
+      //   const userInputData = {};
+      //   for (let i = 0; i < inputs.length; i++) {
+      //     userInputData[inputs[i].fieldName] = inputs[i].val;
+      //   }
+
+      //   try {
+      //     await axios.post('http://localhost:3001/save', {
+      //       userInput: userInputData, selectedFormId
+      //     });
+      //     console.log('User input saved successfully');
+
+      //     // Add the user inputs to the userInputs array
+      //     const newInput = userInputData;
+      //     setUserInputs((prevUserInputs) => [...prevUserInputs, newInput]);
+
+      //     // Clear the input fields
+      //     setLastQuestionValue('');
+      //     setInputs([]);
+
+      //   } catch (error) {
+      //     console.error('Failed to save user input:', error);
+      //   }
+      // };
+
       const sendUserInput = async () => {
         const userInputData = {};
         for (let i = 0; i < inputs.length; i++) {
@@ -226,10 +272,11 @@ const ChatBot = () => {
         }
 
         try {
-          await axios.post('http://localhost:3001/save', {
-            userInput: userInputData, selectedFormId
-          });
-          console.log('User input saved successfully');
+          doneFlag = 1;
+          // await axios.post('http://localhost:3001/save', {
+          //   userInput: userInputData, selectedFormId
+          // });
+          // console.log('User input saved successfully');
 
           // Add the user inputs to the userInputs array
           const newInput = userInputData;
@@ -288,9 +335,9 @@ const ChatBot = () => {
               ))}
             </div>
           )}
-          {questions[currentQuestionIndex] && questions[currentQuestionIndex].options ? (
+          {questions[getStateValue('currentQuestionIndex')] && questions[getStateValue('currentQuestionIndex')].options ? (
             <div className="checkbox-options">
-              {questions[currentQuestionIndex].options.map((option) => (
+              {questions[getStateValue('currentQuestionIndex')].options.map((option) => (
                 <div key={option.value} className="checkbox-option">
                   <input
                     type="checkbox"
@@ -300,13 +347,16 @@ const ChatBot = () => {
                     checked={false}
                     onChange={() => {
                       // setCheckboxValue(option.value);
-                      setInputs([...inputs, { fieldName: questions[currentQuestionIndex].field, val: option.value }]);
+                      setFieldValue(questions[getStateValue('currentQuestionIndex')].field, option.value);
+                      if (questions[getStateValue('currentQuestionIndex')].mandatory)
+                        setFilledMandatoryFieldIndicator(questions[getStateValue('currentQuestionIndex')].field, 1);
+                      setInputs([...inputs, { fieldName: questions[getStateValue('currentQuestionIndex')].field, val: option.value }]);
                       const checkboxMessage = {
                         text: option.value,
                         isUser: true,
                       };
                       setMessages([...messages, checkboxMessage]);
-                      if (currentQuestionIndex === questions.length-1)
+                      if (getStateValue('currentQuestionIndex') === questions.length - 1)
                         setLastQuestionValue('Empty');
                       askNextQuestion();
                     }}
@@ -331,6 +381,7 @@ const ChatBot = () => {
           <button onClick={stopVoiceRecognition}>Stop Voice Recognition</button>
         </div>
       </div>
+      {doneFlag ? <button onClick={goBack} className="submit-button">Back to Menu</button> : null}
     </>
   );
 };

@@ -89,9 +89,36 @@ class ViewData extends Component {
                           top: field[data]["ty"] + "%",
                         }
                       }
-                      return (
-                        <strong><div style={st2.location}>{data}</div></strong>
-                      )
+                      if (field[data]["type"] === "Text") {
+                        return (
+                          <strong><div style={st2.location}>{data}</div></strong>
+                        )
+                      }
+                      else if (field[data]["type"] === "Signature") {
+                        if (data instanceof Blob) {
+                          return (
+                            <div style={st2.location}><img src={URL.createObjectURL(data)} alt="Passport" /></div>
+                          )
+                        }
+                        else {
+                          // Convert the base64 string to binary data
+                          const binaryImageData = atob(data);
+                          const arrayBuffer = new ArrayBuffer(binaryImageData.length);
+                          const view = new Uint8Array(arrayBuffer);
+                          for (let i = 0; i < binaryImageData.length; i++) {
+                            view[i] = binaryImageData.charCodeAt(i);
+                          }
+                          // Create a Blob and generate a URL for displaying the image
+                          const blob = new Blob([arrayBuffer], { type: 'image/png' });
+                          return (
+                            <div style={st2.location}><img src={URL.createObjectURL(blob)} alt="Passport" /></div>
+                          )
+                        }
+                      } else {
+                        return (
+                          <strong><div style={st2.location}>Nothing</div></strong>
+                        )
+                      }
                     })}
                   </div>
                 )

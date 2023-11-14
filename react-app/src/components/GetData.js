@@ -10,7 +10,7 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Icon from '@material-ui/core/Icon';
 import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from './axios-object';
-import { setTemplateId, setDId, setStateValue, getTemplateId } from './values';
+import { setTemplateId, setDId, setStateValue, getTemplateId, setFieldValue, checkIfMandatoryField, setFilledMandatoryFieldIndicator, getAllFieldValues } from './values';
 
 const styles = theme => ({
   main: {
@@ -106,6 +106,11 @@ class GetData extends Component {
     axios.post('/submitform/' + this.state.tid, image).then((response) => {
       alert("Template Submitted Successfully");
       // this.context.router.history.push("/viewdata/"+this.state.tid+"/"+response.data.id);
+      for(const field of Object.keys(response.data.fieldValues)){
+        setFieldValue(field,response.data.fieldValues[field]);
+        if(checkIfMandatoryField(field))
+        setFilledMandatoryFieldIndicator(field, 1);
+      }
       setDId(response.data.id);
       window.history.pushState({}, null, "/viewdata");
       window.dispatchEvent(new Event('popstate'));

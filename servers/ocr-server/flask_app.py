@@ -143,14 +143,16 @@ def submit_form(tid=None):
             resp = jsonify({"error":'No selected file'})
             resp.status_code = 400
         else :
+            fieldValues={}
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], tid+" form"))
             print('IMAGE UPLOADED')
             imageRegistration(UPLOAD_FOLDER+tid+" form",UPLOAD_FOLDER+tid)
             print('IMAGE REGISTERED')
-            rid = get_data(tid,model,mapping)
+            rid = get_data(tid,model,mapping,fieldValues)
             print('DATA EXTRACTED SUCCESSFULLY > ',rid)
-            resp = jsonify({"error":None,"id":rid})
+            print(fieldValues)
+            resp = jsonify({"error":None,"id":rid, "fieldValues":fieldValues })
             resp.status_code = 200
     resp.headers.add('Access-Control-Allow-Origin', '*')
     return resp
@@ -356,7 +358,9 @@ def show_marked(tid=None,did=None):
     fields = sqlsession.query(Field).filter_by(templateid = tid).all()
     # print('show_marked  fields -',fields)
     rows = json.dumps([c for c in fields], cls=AlchemyEncoder)
+    # print("rows - ", rows)
     fdata = eval(rows)
+    # print("fdata- " ,fdata)
     # conn = engine.connect()
     try:
         with engine.connect() as conn:
@@ -367,7 +371,9 @@ def show_marked(tid=None,did=None):
     #     print('it - ',it)
     #     data = dict(zip(it.keys(),it))   
     for it in el:
-        data = dict(zip(column_names,[val for val in it]))   
+        data = dict(zip(column_names,[val for val in it]))
+
+    # print("data - ",data)
 
         
     json_data=[]
@@ -379,11 +385,85 @@ def show_marked(tid=None,did=None):
                     "by" : row["percentbottomy"],
                     "lx" : row["percentleftx"],
                     "rx" : row["percentrightx"],
-                    "bc" : row["boxcount"]
+                    "bc" : row["boxcount"],
+                    "type": row["Type"]
                 }
                 pos = {
                     data[key]: loc,
                 }
+                json_data.append(pos)
+                break
+
+    response = app.response_class(
+        response = json.dumps(json_data),
+        mimetype='application/json'
+    )
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.status_code = 200
+    # conn.close()
+    return response
+
+@app.route("/showFinalMarked/<tid>",methods=['POST'])
+def show_final_marked(tid=None):
+    # Create an inspector to inspect the database
+    # inspector = inspect(engine)
+
+    # Get the column names for the specified table (tid)
+    # column_names = [column['name'] for column in inspector.get_columns(tid)]
+    # print('Column names:', column_names)
+
+    fields = sqlsession.query(Field).filter_by(templateid = tid).all()
+    # print('show_marked  fields -',fields)
+    rows = json.dumps([c for c in fields], cls=AlchemyEncoder)
+    # print("rows - ", rows)
+    fdata = eval(rows)
+    # print("fdata- " ,fdata)
+    # conn = engine.connect()
+    # try:
+    #     with engine.connect() as conn:
+    #         el = conn.execute(text('select * from "' + str(tid) + '" where id is '+did))
+    # except Exception as e:
+    #     print('error: ',e)
+    # for it in el:
+    #     print('it - ',it)
+    #     data = dict(zip(it.keys(),it))   
+    # for it in el:
+    #     data = dict(zip(column_names,[val for val in it]))
+    print(request)
+    data2=request.get_json(force=True)
+    
+
+    data=dict()
+    for d in data2:
+        if d=="passportImage":
+            # data[d]=request.files['image']
+            data[d]=d
+        else:
+            data[d]=data2[d]
+    print(data)
+        
+    json_data=[]
+    for key in data:
+        for row in fdata:
+            if row["name"] == key:
+                loc = {
+                    "ty" : row["percenttopy"],
+                    "by" : row["percentbottomy"],
+                    "lx" : row["percentleftx"],
+                    "rx" : row["percentrightx"],
+                    "bc" : row["boxcount"],
+                    "type": row["Type"],
+                    "field": row["name"],
+                }
+                if key=="passportImage":
+                    # loc["imageData"]=data[key]
+                    pos = {
+                        "passportImage": loc,
+                    }
+                else:
+                    pos = {
+                        data[key]: loc,
+                    }
                 json_data.append(pos)
                 break
 

@@ -101,15 +101,16 @@ def add_output_on_background(output_image_path, background_image_path, output_wi
 
 if __name__ == "__main__":
     print(sys.argv)
-    if len(sys.argv) != 3:
-        print("Usage: python process_image.py <input_image_path> <output_image_path> <output_width> <output_height>")
+    if len(sys.argv) != 4:
+        print("Usage: python process_image.py <input_image_path> <output_image_path> <background_color>")
         sys.exit(1)
 
     input_image_path = sys.argv[1]
     output_image_path = sys.argv[2]
+    background_color = sys.argv[3]
     main_face_output_path = './main_face.png'
-    main_face_size=(250,300)  # Adjust the desired output size as needed
-    output_size = (600, 600)
+    main_face_size=(95,120)  # Adjust the desired output size as needed
+    output_size = (95, 120)
 
     # save_main_face_with_extended_area(input_image_path,main_face_output_path)
     remove_noise_and_extract_face(input_image_path, main_face_output_path, output_size)
@@ -120,7 +121,12 @@ if __name__ == "__main__":
     removed_bg_output = remove(input)
     removed_bg_output.save(removed_bg_output_path)
 
-    background_path = './background.png'
+    background_color_paths={
+        "white": './white_background.png',
+        "blue": './blue_background.png',
+    }
+
+    background_path = background_color_paths[background_color]
     image_with_new_bg_path = './image_with_new_bg.png'
     background_img = Image.open(background_path)
 
@@ -135,6 +141,6 @@ if __name__ == "__main__":
     background_img.paste(foreground_img, (0,0), alpha_channel)
     background_img.save(image_with_new_bg_path, format='png')
 
-    border_size = 20  # Adjust the border size as needed
+    border_size = 5  # Adjust the border size as needed
 
     add_output_on_background(image_with_new_bg_path, background_path, output_image_path, border_size)
