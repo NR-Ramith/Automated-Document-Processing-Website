@@ -60,16 +60,16 @@ def get_data(tid,model,mapping,fieldValues):
         block = im[y1:y2,x1:x2]
         cv2.imwrite(os.path.join(UPLOAD_FOLDER,"{}.png".format(id)),block)
         if row[2]=="Text":
-            text = pytesseract.image_to_string(block, lang = 'eng')
-            print('pytesseract prediction -', text)
+            pytext = pytesseract.image_to_string(block, lang = 'eng')
+            print('pytesseract prediction -', pytext)
             # Initialize the EasyOCR reader
-            # reader = easyocr.Reader(['en'], gpu=False)
-            # results = reader.readtext(block)
-            # eocrtext=''
-            # for (bbox, text, prob) in results:
-            #     eocrtext+=text
-            # print('easyocr prediction -', eocrtext)
-            text_without_spaces = "".join([char for char in text if char != ' '])
+            reader = easyocr.Reader(['en'], gpu=False)
+            results = reader.readtext(block)
+            eocrtext=''
+            for (bbox, text, prob) in results:
+                eocrtext+=text
+            print('easyocr prediction -', eocrtext)
+            text_without_spaces = "".join([char for char in pytext if char != ' '])
             if text_without_spaces:
                 fieldValues[row[1]]=text_without_spaces
             print(text_without_spaces)

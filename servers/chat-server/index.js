@@ -120,9 +120,6 @@ app.post('/saveResponse', upload.single('passportImage'), async (req, res) => {
         return;
       }
     }
-  } else {
-    console.error('No file provided for passportImage');
-    res.sendStatus(400);
   }
     
 

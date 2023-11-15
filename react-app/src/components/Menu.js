@@ -43,38 +43,42 @@ const Menu = () => {
     }, [location.state]);
 
     const handleImageUpload = async (imageData) => {
-        setIsLoading(true); // Set loading state to true when processing starts
+        if (imageData && !isLoading) {
+            setIsLoading(true); // Set loading state to true when processing starts
 
-        try {
-            const response = await fetch('http://localhost:5000/processImage', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ imageData, backgroundColor }), // Assuming imageData is a base64-encoded image
-            });
+            try {
+                const response = await fetch('http://localhost:5000/processImage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ imageData, backgroundColor }), // Assuming imageData is a base64-encoded image
+                });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+
+                // Check if the Blob has a valid type (e.g., image/jpeg, image/png)
+                if (blob.type.startsWith('image/')) {
+                    // Create a Blob URL for the image
+                    setProcessedImageBlob(blob);
+                    const imageUrl = URL.createObjectURL(blob);
+                    setProcessedImageURL(imageUrl);
+                } else {
+                    console.error('Invalid Blob type:', blob.type);
+                    // Handle the case where the Blob is not a valid image
+                }
+            } catch (error) {
+                console.error('Error fetching image:', error);
+                // Handle the fetch error here
+            } finally {
+                setIsLoading(false); // Set loading state to false when processing is complete
             }
-
-            const blob = await response.blob();
-
-            // Check if the Blob has a valid type (e.g., image/jpeg, image/png)
-            if (blob.type.startsWith('image/')) {
-                // Create a Blob URL for the image
-                setProcessedImageBlob(blob);
-                const imageUrl = URL.createObjectURL(blob);
-                setProcessedImageURL(imageUrl);
-            } else {
-                console.error('Invalid Blob type:', blob.type);
-                // Handle the case where the Blob is not a valid image
-            }
-        } catch (error) {
-            console.error('Error fetching image:', error);
-            // Handle the fetch error here
-        } finally {
-            setIsLoading(false); // Set loading state to false when processing is complete
+        } else {
+            alert('Upload Image');
         }
     };
 
@@ -163,7 +167,7 @@ const Menu = () => {
                         <option value="blue">Blue</option>
                     </select>
                 </div>
-                <UploadForm onImageUpload={handleImageUpload} fileInputRef={fileInputRef} />
+                <UploadForm onImageUpload={handleImageUpload} fileInputRef={fileInputRef} isLoading={isLoading} />
                 {isLoading ? (
                     <div className="loading-spinner-container">
                         <div className="loading-spinner"></div>

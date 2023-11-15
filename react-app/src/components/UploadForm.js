@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function UploadForm({ onImageUpload, fileInputRef }) {
+function UploadForm({ onImageUpload, fileInputRef, isLoading }) {
   const [imageData, setImageData] = useState('');
 
   const handleImageChange = (e) => {
@@ -23,7 +23,7 @@ function UploadForm({ onImageUpload, fileInputRef }) {
     <div>
       <form onSubmit={handleSubmit}>
         <input type="file" accept=".jpg,.jpeg,.png" onChange={handleImageChange} ref={fileInputRef} />
-        <button className='process-button' type="submit">Process Image</button>
+        <button className='process-button' type="submit">{isLoading ? 'Processing...' : 'Process Image'}</button>
       </form>
     </div>
   );
