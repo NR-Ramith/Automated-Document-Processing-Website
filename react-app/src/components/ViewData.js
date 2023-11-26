@@ -84,8 +84,8 @@ class ViewData extends Component {
                           position: "absolute",
                           margin: "0 auto",
                           color: "black",
-                          letterSpacing: "0.4em",
-                          left: field[data]["lx"] + 0.5 + "%",
+                          letterSpacing: "0.2em",
+                          left: field[data]["lx"] + 0.35 + "%",
                           top: field[data]["ty"] + "%",
                         }
                       }

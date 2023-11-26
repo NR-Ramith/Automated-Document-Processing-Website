@@ -50,16 +50,20 @@ class ViewFinalData extends Component {
         let did = getDId();
         this.setState({ tid: tid, did: did });
 
-        const url = window.URL.createObjectURL(new Blob([getStateValue("form-image")]));
-        this.setState({ formImageURL: url });
+        if (getTemplateId() < 100) {
 
-        // Make a request to fetch the file data
-        axios.get('/getTemplateFile/' + tid, { responseType: 'blob' })
-            .then((response) => {
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                // Set the URL to a state variable
-                this.setState({ templateURL: url });
-            });
+            const url = window.URL.createObjectURL(new Blob([getStateValue("form-image")]));
+            this.setState({ formImageURL: url });
+
+            // Make a request to fetch the file data
+            axios.get('/getTemplateFile/' + tid, { responseType: 'blob' })
+                .then((response) => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    // Set the URL to a state variable
+                    this.setState({ templateURL: url });
+                });
+
+        }
 
         const dataToSend = getAllFieldValues();
 
@@ -68,14 +72,16 @@ class ViewFinalData extends Component {
             Object.entries(dataToSend).filter(([key, value]) => value !== null)
         );
 
-        axios.post('/showFinalMarked/' + tid, filteredData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-            .then(response => {
-                this.setState({ data: response.data });
-            });
+        if (getTemplateId() < 100) {
+            axios.post('/showFinalMarked/' + tid, filteredData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+                .then(response => {
+                    this.setState({ data: response.data });
+                });
+        }
     }
 
     handleInputChange = (e) => {
@@ -92,6 +98,14 @@ class ViewFinalData extends Component {
     handleDateChange = (e) => {
         const newDate = e.target.value;
         this.setState({ date: newDate });
+    };
+
+    getPreview = () => {
+        return Object.entries(getAllFieldValues()).map(([key, value]) => (
+          <p key={key}>
+            <strong>{key}:</strong> {value}
+          </p>
+        ));
     };
 
 
@@ -125,35 +139,42 @@ class ViewFinalData extends Component {
                     const formData = new FormData();
                     formData.append('userInput', JSON.stringify(filteredData));
                     formData.append('selectedFormId', getTemplateId());
-                    if('passportImage' in filteredData){
+                    if ('passportImage' in filteredData) {
                         formData.append('passportImage', getAllFieldValues()['passportImage']);
                     }
+                    let url=''
+
+                    if(getTemplateId()<100)
+                    url = `http://localhost:3001/saveResponse`;
+                    else
+                    url = `http://localhost:5000/submit_form${getTemplateId()}`;
 
                     // Send a POST request to the server
-                    fetch(`http://localhost:3001/saveResponse`, {
+                    fetch(url, {
                         method: 'POST',
                         body: formData,
-                      })
+                        
+                    })
                         .then(response => {
-                          if (response.status!==200) {
-                            throw new Error('Network response was not ok');
-                          }
+                            if (response.status !== 200) {
+                                throw new Error('Network response was not ok');
+                            }
                         })
                         .then(() => {
-                          // Handle success
-                          alert('Response Submitted');
-                          setTemplateId(0);
-                          setDId(0);
-                          resetFieldValues();
-                          resetFilledMandatoryFieldIndicator();
-                          resetStateValues();
-                          window.history.pushState({}, null, "/formsList");
-                          window.dispatchEvent(new Event('popstate'));
+                            // Handle success
+                            alert('Response Submitted');
+                            setTemplateId(0);
+                            setDId(0);
+                            resetFieldValues();
+                            resetFilledMandatoryFieldIndicator();
+                            resetStateValues();
+                            window.history.pushState({}, null, "/formsList");
+                            window.dispatchEvent(new Event('popstate'));
                         })
                         .catch(error => {
-                          // Handle error
-                          console.error('Error submitting response:', error);
-                          alert('Failed to submit response. Please try again.');
+                            // Handle error
+                            console.error('Error submitting response:', error);
+                            alert('Failed to submit response. Please try again.');
                         });
                 } else {
                     alert('Enter today\'s date.');
@@ -170,47 +191,77 @@ class ViewFinalData extends Component {
         const { classes } = this.props;
         return (
             <div className={classes.root}>
-                <Grid container wrap="nowrap" spacing={24}>
-                    <Grid item xs={6}>
-                        <Paper className={classes.paper}>
-                            <img src={this.state.formImageURL} className={classes.image} alt='' />
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Paper className={classes.finalpaper}>
-                            <img src={this.state.templateURL} className={classes.image} alt='' />
+                {getTemplateId()>100 ?
+                        <div className="preview-section">
+                            <h3>Preview:</h3>
+                            {this.getPreview()}
+                        </div>
+                    :
+                    <Grid container wrap="nowrap" spacing={24}>
+                        <Grid item xs={6}>
+                            <Paper className={classes.paper}>
+                                <img src={this.state.formImageURL} className={classes.image} alt='' />
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Paper className={classes.finalpaper}>
+                                <img src={this.state.templateURL} className={classes.image} alt='' />
 
-                            {this.state.data.map((field, key) => {
+                                {this.state.data.map((field, key) => {
 
-                                return (
-                                    <div>
-                                        {Object.keys(field).map(data => {
-                                            const st2 = {
-                                                location: {
-                                                    position: "absolute",
-                                                    margin: "0 auto",
-                                                    color: "black",
-                                                    letterSpacing: "0.4em",
-                                                    left: field[data]["lx"] + 0.5 + "%",
-                                                    top: field[data]["ty"] + "%",
+                                    return (
+                                        <div>
+                                            {Object.keys(field).map(data => {
+                                                const st2 = {
+                                                    location: {
+                                                        position: "absolute",
+                                                        margin: "0 auto",
+                                                        color: "black",
+                                                        letterSpacing: "0.2em",
+                                                        left: field[data]["lx"] + 0.35 + "%",
+                                                        top: field[data]["ty"] + "%",
+                                                    }
                                                 }
-                                            }
-                                            if (field[data]["type"] === "Text") {
-                                                return (
-                                                    <strong><div style={st2.location}><input type="text" class="transparent-input" placeholder={data} defaultValue={data}
-                                                        data-field={field[data]['field']} onChange={(e) => this.handleInputChange(e)} /></div></strong>
-                                                )
-                                            }
-                                            else if (field[data]["type"] === "Signature") {
-                                                if (data === 'passportImage') {
-                                                    if (getAllFieldValues()['passportImage'] instanceof Blob) {
-                                                        return (
-                                                            <div style={st2.location}><img src={URL.createObjectURL(getAllFieldValues()['passportImage'])} alt="Passport" /></div>
-                                                        )
+                                                if (field[data]["type"] === "Text") {
+                                                    return (
+                                                        <strong><div style={st2.location}><input type="text" class="transparent-input" placeholder={data} defaultValue={data}
+                                                            data-field={field[data]['field']} onChange={(e) => this.handleInputChange(e)} /></div></strong>
+                                                    )
+                                                }
+                                                else if (field[data]["type"] === "Signature") {
+                                                    if (data === 'passportImage') {
+                                                        if (getAllFieldValues()['passportImage'] instanceof Blob) {
+                                                            return (
+                                                                <div style={st2.location}><img src={URL.createObjectURL(getAllFieldValues()['passportImage'])} alt="Passport" /></div>
+                                                            )
+                                                        }
+                                                        else {
+                                                            // Convert the base64 string to binary data
+                                                            const binaryImageData = atob(getAllFieldValues()['passportImage']);
+                                                            const arrayBuffer = new ArrayBuffer(binaryImageData.length);
+                                                            const view = new Uint8Array(arrayBuffer);
+                                                            for (let i = 0; i < binaryImageData.length; i++) {
+                                                                view[i] = binaryImageData.charCodeAt(i);
+                                                            }
+                                                            // Create a Blob and generate a URL for displaying the image
+                                                            const blob = new Blob([arrayBuffer], { type: 'image/png' });
+                                                            setFieldValue(field[data]['field'], blob);
+                                                            return (
+                                                                <div style={st2.location}><img src={URL.createObjectURL(blob)} alt="Passport" /></div>
+                                                            )
+                                                        }
+                                                        // else {
+                                                        //     // Fetch the blob data from the FormData object
+                                                        //     console.log(" form data - ", field[data]["imageData"])
+                                                        //     const blobData = field[data]["imageData"].get('image');
+                                                        //     return (
+                                                        //         <div style={st2.location}><img src={URL.createObjectURL(blobData)} alt="Passport" /></div>
+                                                        //     )
+                                                        // }
                                                     }
                                                     else {
                                                         // Convert the base64 string to binary data
-                                                        const binaryImageData = atob(getAllFieldValues()['passportImage']);
+                                                        const binaryImageData = atob(data);
                                                         const arrayBuffer = new ArrayBuffer(binaryImageData.length);
                                                         const view = new Uint8Array(arrayBuffer);
                                                         for (let i = 0; i < binaryImageData.length; i++) {
@@ -218,52 +269,29 @@ class ViewFinalData extends Component {
                                                         }
                                                         // Create a Blob and generate a URL for displaying the image
                                                         const blob = new Blob([arrayBuffer], { type: 'image/png' });
-                                                        setFieldValue(field[data]['field'], blob);
+                                                        setFieldValue('passportImage', blob);
                                                         return (
                                                             <div style={st2.location}><img src={URL.createObjectURL(blob)} alt="Passport" /></div>
                                                         )
                                                     }
-                                                    // else {
-                                                    //     // Fetch the blob data from the FormData object
-                                                    //     console.log(" form data - ", field[data]["imageData"])
-                                                    //     const blobData = field[data]["imageData"].get('image');
-                                                    //     return (
-                                                    //         <div style={st2.location}><img src={URL.createObjectURL(blobData)} alt="Passport" /></div>
-                                                    //     )
-                                                    // }
-                                                }
-                                                else {
-                                                    // Convert the base64 string to binary data
-                                                    const binaryImageData = atob(data);
-                                                    const arrayBuffer = new ArrayBuffer(binaryImageData.length);
-                                                    const view = new Uint8Array(arrayBuffer);
-                                                    for (let i = 0; i < binaryImageData.length; i++) {
-                                                        view[i] = binaryImageData.charCodeAt(i);
-                                                    }
-                                                    // Create a Blob and generate a URL for displaying the image
-                                                    const blob = new Blob([arrayBuffer], { type: 'image/png' });
-                                                    setFieldValue('passportImage', blob);
+
+                                                } else {
                                                     return (
-                                                        <div style={st2.location}><img src={URL.createObjectURL(blob)} alt="Passport" /></div>
+                                                        <strong><div style={st2.location}>Nothing</div></strong>
                                                     )
                                                 }
+                                            })}
+                                        </div>
+                                    )
+                                })}
 
-                                            } else {
-                                                return (
-                                                    <strong><div style={st2.location}>Nothing</div></strong>
-                                                )
-                                            }
-                                        })}
-                                    </div>
-                                )
-                            })}
-
-                        </Paper>
+                            </Paper>
+                        </Grid>
                     </Grid>
-                </Grid>
+                }
                 <div>
                     <input type="text" onChange={this.handleNameChange} placeholder="Your Name" />
-                    <input type="text" onChange={this.handleDateChange} placeholder="Date - YYYY-MM-DD" />
+                    <input type="text" onChange={this.handleDateChange} placeholder="Date - DD-MM-YYYY" />
                     <Button variant="contained" color="primary" className={classes.button} type="submit" onClick={this.handleSubmit}>
                         Submit Response
                     </Button>

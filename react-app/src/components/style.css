@@ -69,3 +69,15 @@
 .voice-recognition button {
     margin-left: 10px;
 }
+
+.preview-section {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .preview-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }

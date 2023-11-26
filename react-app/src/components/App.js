@@ -19,6 +19,9 @@ import NewTemplateMenu from './NewTemplateMenu';
 import AddChatbotFields from './AddChatbotFields';
 import CreateFormEntry from './CreateFormEntry';
 import ViewFinalData from './ViewFinalData';
+import OnlineFormsList from './OnlineFormsList';
+import FormFieldFetcher from './FormFieldFetcher';
+import GoogleSheetForm from './GoogleSheetForm';
 
 
 class App extends Component {
@@ -91,6 +94,11 @@ class App extends Component {
               <FormsList />
             </>}>
             </Route>
+            <Route exact path='/onlineFormsList' element={<>
+              <Header />
+              <OnlineFormsList />
+            </>}>
+            </Route>
             <Route exact path='/createFormEntry' element={<>
               <Header />
               <CreateFormEntry />
@@ -119,6 +127,8 @@ class App extends Component {
             <Route exact path='/' element={<>
               <Header />
               <Home />
+              {/* <FormFieldFetcher/> */}
+              {/* <GoogleSheetForm/> */}
             </>}>
             </Route>
           </Routes>

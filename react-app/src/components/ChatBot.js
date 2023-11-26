@@ -97,18 +97,18 @@ const ChatBot = () => {
     while (getStateValue('currentQuestionIndex') + 1 < questions.length) {
       const nextQuestion = questions[getStateValue('currentQuestionIndex') + 1];
       // Check if the question is already filled
-      if (getFieldValue(nextQuestion.field)==null) {
+      if (getFieldValue(nextQuestion.field) == null) {
         // If the question is filled, assign it as the next question and read it out
         const nextQuestionMessage = { text: nextQuestion.text, isUser: false };
         setMessages((messages) => [...messages, nextQuestionMessage]);
         readOutText(nextQuestion.text);
         // setCurrentQuestionIndex(currentQuestionIndex + 1);
         // currentQuestionIndex+=1;
-        setStateValue('currentQuestionIndex', getStateValue('currentQuestionIndex')+1);
+        setStateValue('currentQuestionIndex', getStateValue('currentQuestionIndex') + 1);
         return;
       } else {
         // setCurrentQuestionIndex(currentQuestionIndex + 1);
-        setStateValue('currentQuestionIndex', getStateValue('currentQuestionIndex')+1);
+        setStateValue('currentQuestionIndex', getStateValue('currentQuestionIndex') + 1);
       }
     }
     const endMessage = {
@@ -381,7 +381,7 @@ const ChatBot = () => {
           <button onClick={stopVoiceRecognition}>Stop Voice Recognition</button>
         </div>
       </div>
-      {doneFlag ? <button onClick={goBack} className="submit-button">Back to Menu</button> : null}
+      <button onClick={goBack} className="submit-button">Back to Menu</button>
     </>
   );
 };

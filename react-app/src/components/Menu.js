@@ -9,6 +9,7 @@ const Menu = () => {
     const [processedImageBlob, setProcessedImageBlob] = useState(null);
     const [processedImageURL, setProcessedImageURL] = useState(null);
     const [backgroundColor, setBackgroundColor] = useState('white');
+    const [imageSize, setImageSize] = useState('95x120');
     const [isLoading, setIsLoading] = useState(false); // New loading state
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
@@ -52,7 +53,7 @@ const Menu = () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ imageData, backgroundColor }), // Assuming imageData is a base64-encoded image
+                    body: JSON.stringify({ imageData, imageSize, backgroundColor }), // Assuming imageData is a base64-encoded image
                 });
 
                 if (!response.ok) {
@@ -84,6 +85,10 @@ const Menu = () => {
 
     const handleBackgroundChange = (e) => {
         setBackgroundColor(e.target.value);
+    };
+
+    const handleSizeChange = (e) => {
+        setImageSize(e.target.value);
     };
 
     const handleButtonClick = () => {
@@ -165,6 +170,18 @@ const Menu = () => {
                         <option value="white">Choose...</option>
                         <option value="white">White</option>
                         <option value="blue">Blue</option>
+                    </select>
+                    <br/>
+                    <label className="background-dropdown-label">Image size&nbsp;</label>
+                    <select
+                        className="background-dropdown"
+                        value={imageSize}
+                        onChange={handleSizeChange}
+                    >
+                        <option value="95x120">Choose...</option>
+                        <option value="95x120">95 x 120</option>
+                        <option value="100x100">100 x 100</option>
+                        <option value="150x200">150 x 200</option>
                     </select>
                 </div>
                 <UploadForm onImageUpload={handleImageUpload} fileInputRef={fileInputRef} isLoading={isLoading} />

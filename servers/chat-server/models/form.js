@@ -11,5 +11,9 @@ const formSchema = new mongoose.Schema({
 
 // Create the Mongoose model
 const Form = mongoose.model('Form', formSchema);
+const OnlineForm = mongoose.model('OnlineForm', formSchema);
 
-module.exports = Form;
+module.exports = {
+  Form,
+  OnlineForm
+};

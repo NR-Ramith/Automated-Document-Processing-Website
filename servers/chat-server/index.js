@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const Question = require('./models/questions.js');
 const fs = require('fs');
-const Form = require('./models/form');
+const { Form, OnlineForm } = require('./models/form.js');
 const multer = require('multer');
 
 const app = express();
@@ -236,6 +236,50 @@ app.get('/getQuestions/:selectedFormId', async (req, res) => {
     // Handle any errors that may occur during the query.
     console.error('Error:', error);
     res.status(500).send('Internal server error');
+  }
+});
+
+
+
+app.get('/getOnlineForms', async (req, res) => {
+  try {
+    const forms = await OnlineForm.find({}); // Fetch all entries using the Form model
+
+    if (!forms) {
+      return res.status(404).json({ message: 'No forms found' });
+    }
+
+    const formsWithImages = forms.map(async (form) => {
+      // Extract image paths from the form data
+      const { id, name, description, frontImageURL, imageURLs } = form;
+
+      // Function to encode an image as a base64 data URI
+      const encodeImage = async (path) => {
+        const data = fs.readFileSync(path);
+        const base64Image = Buffer.from(data).toString('base64');
+        const mimeType = path.endsWith('.png') ? 'image/png' : 'image/jpeg';
+        return `data:${mimeType};base64,${base64Image}`;
+      };
+
+      // Encode the images asynchronously
+      const frontImage = frontImageURL ? await encodeImage(frontImageURL) : null;
+      const images = await Promise.all(imageURLs.map((imageURL) => encodeImage(imageURL)));
+
+      return {
+        id,
+        name,
+        description,
+        frontImage,
+        images,
+      };
+    });
+
+    const formsData = await Promise.all(formsWithImages);
+
+    res.status(200).json(formsData);
+  } catch (err) {
+    console.error('Error fetching forms from MongoDB:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

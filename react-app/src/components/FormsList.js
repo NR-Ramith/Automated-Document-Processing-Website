@@ -42,9 +42,16 @@ const FormsList = () => {
         navigate('/createNewTemplate');
     };
 
+    const handleFillOnlineFormClick = () => {
+        navigate('/onlineFormsList');
+    };
+
     return (
         <div className="forms-list-container">
             <h1 className="forms-list-heading">Available Forms</h1>
+            <button className="online-form-button" onClick={handleFillOnlineFormClick}>
+                Fill Online Form
+            </button>
             <button className="create-template-button" onClick={handleCreateTemplateClick}>
                 Create New Template
             </button>
@@ -56,12 +63,16 @@ const FormsList = () => {
                         <button onClick={handleBackButtonClick}>&lt; Back to Forms List</button>
                         <div className="form-images">
                             {selectedForm.images.map((image, index) => (
+                                <>
                                 <img
                                     key={index}
                                     src={image} // Set the image source URL
                                     alt={`Page ${index + 1}`}
                                     className="form-image"
+                                    style={{ maxHeight: '150vh', maxWidth: '100%' }}
                                 />
+                                <br/>
+                                </>
                             ))}
                         </div>
                     </div>
