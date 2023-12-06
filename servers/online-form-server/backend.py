@@ -9,6 +9,7 @@ CORS(app)
 
 @app.route('/submit_form101', methods=['POST'])
 def submit_form():
+    print(request.form)
     # Access the ImmutableMultiDict
     form_data = request.form
 

@@ -57,7 +57,7 @@ const OnlineFormsList = () => {
                 {selectedForm ? (
                     <div className="selected-form">
                         <h2>{selectedForm.name}</h2>
-                        <p>{selectedForm.description}</p>
+                        <p style={{fontFamily:"Georgia"}}>{selectedForm.description}</p>
                         <button onClick={handleBackButtonClick}>&lt; Back to Forms List</button>
                         <div className="form-images">
                             {selectedForm.images.map((image, index) => (

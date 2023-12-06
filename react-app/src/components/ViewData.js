@@ -89,7 +89,7 @@ class ViewData extends Component {
                           top: field[data]["ty"] + "%",
                         }
                       }
-                      if (field[data]["type"] === "Text") {
+                      if (field[data]["type"].slice(0,4) === "Text") {
                         return (
                           <strong><div style={st2.location}>{data}</div></strong>
                         )

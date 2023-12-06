@@ -85,7 +85,7 @@ const FormsList = () => {
                                 </div>
                                 <div className="form-details">
                                     <h3>{form.name}</h3>
-                                    <p>{form.description}</p>
+                                    <p style={{fontFamily:"Georgia"}}>{form.description}</p>
                                     <div className="buttons">
                                         <div onClick={() => handleFormClick(form)} className="button preview-button">
                                             Preview

@@ -303,7 +303,7 @@ const ChatBot = () => {
   }, [messages]);
 
   return (
-    <>
+    <div className='chatbot-window'>
       <button onClick={goBack} className="back-button">&lt; Back</button>
       <div className="chatbot-container">
         <div className="chatbot-header">
@@ -382,7 +382,7 @@ const ChatBot = () => {
         </div>
       </div>
       <button onClick={goBack} className="submit-button">Back to Menu</button>
-    </>
+    </div>
   );
 };
 

@@ -224,6 +224,7 @@ def createMarkTemplate():
     print('fields are -' ,fields)
     # fields are : {'0': {'fieldname': 'q', 'desc': 'q', 'boxcount': None, 'type': 'Text', 'left_x': 528, 'right_x':703, 'top_y': 231, 'bottom_y': 266, 'image_width': 1349, 'image_height': 1568, 'templateName': 'wq', 'username': 'admin', 'templateDesc': 'qw'}}
     tid=reqbody['tid']
+    print(tid)
     template = Template()
     template.userid = tid
     template.name = fields['0']['templateName']
@@ -275,7 +276,7 @@ def createMarkTemplate():
     resp.status_code = 200
     return resp
 
-newTemplateId=9
+newTemplateId=17
 
 @app.route("/getCurrentNewTemplateId",methods=['GET'])
 def get_current_new_template_id():

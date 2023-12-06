@@ -142,18 +142,18 @@ class ViewFinalData extends Component {
                     if ('passportImage' in filteredData) {
                         formData.append('passportImage', getAllFieldValues()['passportImage']);
                     }
-                    let url=''
+                    let url='';
 
-                    if(getTemplateId()<100)
+                    if(getTemplateId()<100){
                     url = `http://localhost:3001/saveResponse`;
-                    else
-                    url = `http://localhost:5000/submit_form${getTemplateId()}`;
-
+                    }
+                    else{
+                    url = `http://127.0.0.1:5000/submit_form${getTemplateId()}`;
+                    }
                     // Send a POST request to the server
                     fetch(url, {
                         method: 'POST',
-                        body: formData,
-                        
+                        body: formData
                     })
                         .then(response => {
                             if (response.status !== 200) {
@@ -176,6 +176,31 @@ class ViewFinalData extends Component {
                             console.error('Error submitting response:', error);
                             alert('Failed to submit response. Please try again.');
                         });
+                    // axios.post(url, bodyData, {
+                    //     headers: {
+                    //       'Content-Type': 'application/json',
+                    //       // Add other headers as needed
+                    //     }
+                    //   })
+                    //     .then(response => {
+                    //       if (response.status !== 200) {
+                    //         throw new Error('Network response was not ok');
+                    //       }
+                    //       // Handle success
+                    //       alert('Response Submitted');
+                    //       setTemplateId(0);
+                    //       setDId(0);
+                    //       resetFieldValues();
+                    //       resetFilledMandatoryFieldIndicator();
+                    //       resetStateValues();
+                    //       window.history.pushState({}, null, "/formsList");
+                    //       window.dispatchEvent(new Event('popstate'));
+                    //     })
+                    //     .catch(error => {
+                    //       // Handle error
+                    //       console.error('Error submitting response:', error);
+                    //       alert('Failed to submit response. Please try again.');
+                    //     });
                 } else {
                     alert('Enter today\'s date.');
                 }
@@ -222,7 +247,7 @@ class ViewFinalData extends Component {
                                                         top: field[data]["ty"] + "%",
                                                     }
                                                 }
-                                                if (field[data]["type"] === "Text") {
+                                                if (field[data]["type"].slice(0,4) === "Text") {
                                                     return (
                                                         <strong><div style={st2.location}><input type="text" class="transparent-input" placeholder={data} defaultValue={data}
                                                             data-field={field[data]['field']} onChange={(e) => this.handleInputChange(e)} /></div></strong>

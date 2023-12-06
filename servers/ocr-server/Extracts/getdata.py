@@ -31,8 +31,8 @@ def create_connection(filename):
 
 def predict_with_pytesseract(image):
     text=pytesseract.image_to_string(image, lang = 'eng')
-    text_without_spaces = "".join([char for char in text if char != ' '])
-    return text_without_spaces.upper()
+    # text_without_spaces = "".join([char for char in text if char != ' '])
+    return text.upper()
 
 def predict_with_easyocr(image):
     reader = easyocr.Reader(['en'], gpu=False)
@@ -45,6 +45,78 @@ def predict_with_easyocr(image):
 def predict_in_thread(func, block, result_queue):
     result = func(block)
     result_queue.put(result)
+
+def rectifyPredictions(type, predicted_string):
+    # Define mapping dictionaries
+    only_alphabets_mapping = {
+        '0': 'o',
+        '1': 'l',
+        '2': 'z',
+        '3': 'e',
+        '4': 'a',
+        '5': 's',
+        '6': 'b',
+        '7': 't',
+        '8': 'b',
+        '9': 'g',
+        '|': 'l',
+        ':': 'i',
+        '!': 'i',
+        '@': 'a',
+        '#': 'h',
+        '$': 's',
+        '*': 'x',
+        '(': 'c',
+        '+': 't',
+        '-': 't',
+        '=': 'c',
+        '[': 'c',
+        '{': 'c',
+        ';': 'i',
+        '<': 'c',
+        ',': 'i',
+        '.': 'i',
+        '/': 'l',
+        '€': 'e',
+        '^': 'a',
+    }
+
+    only_digits_mapping = {
+        'O': '0',
+        'L': '1',
+        'Z': '2',
+        'E': '3',
+        'A': '4',
+        'S': '5',
+        'T': '7',
+        'B': '8',
+        'G': '9',
+        '|': '1',
+        'I': '1',
+        '!': '1',
+        '@': '4',
+        '#': '8',
+        '$': '5',
+        'X': '8',
+        'C': '0',
+        ';': '1',
+        '<': '9',
+        ',': '1',
+        '.': '1',
+        '/': '1',
+        '(': '1',
+        '>': '2',
+        '+': '7',
+        '?': '9',
+    }
+
+    # Select the appropriate mapping dictionary based on the type
+    mapping_dict = only_alphabets_mapping if type == 'onlyAlphabets' else only_digits_mapping
+
+    # Rectify predictions based on the mapping dictionary
+    rectified_string = ''.join(mapping_dict[char] if char in mapping_dict else char for char in predicted_string)
+
+    return rectified_string.upper()
 
 def get_data(tid,model,mapping,fieldValues):
     conn = create_connection(DATABASE)
@@ -61,7 +133,7 @@ def get_data(tid,model,mapping,fieldValues):
     result_queue_pytesseract = queue.Queue()
     result_queue_easyocr = queue.Queue()
     for row in rows:
-        print(row)
+        # print(row)
 
         id = row[0]
         name = row[1]
@@ -81,7 +153,7 @@ def get_data(tid,model,mapping,fieldValues):
 
         block = im[y1:y2,x1:x2]
         cv2.imwrite(os.path.join(UPLOAD_FOLDER,"{}.png".format(id)),block)
-        if row[2]=="Text":
+        if row[2][:4]=="Text":
             thread_pytesseract = threading.Thread(target=predict_in_thread, args=(predict_with_pytesseract, block, result_queue_pytesseract))
             thread_easyocr = threading.Thread(target=predict_in_thread, args=(predict_with_easyocr, block, result_queue_easyocr))
             
@@ -104,13 +176,27 @@ def get_data(tid,model,mapping,fieldValues):
             # print("Recognized Text:", recognized_text)
 
             if eocrtext:
-                fieldValues[row[1]]=eocrtext
-                columndata.append(eocrtext)
-                print(eocrtext)
+                if len(row[2])>4:
+                    text_without_spaces = "".join([char for char in eocrtext if char != ' '])
+                    rectifiedText = rectifyPredictions(row[2][5:], text_without_spaces)
+                    fieldValues[row[1]]=rectifiedText
+                    columndata.append(rectifiedText)
+                    print(rectifiedText)
+                else:
+                    fieldValues[row[1]]=eocrtext
+                    columndata.append(eocrtext)
+                    print(eocrtext)
             elif pytext:
-                fieldValues[row[1]]=pytext
-                columndata.append(pytext)
-                print(pytext)
+                if len(row[2])>4:
+                    text_without_spaces = "".join([char for char in pytext if char != ' '])
+                    rectifiedText = rectifyPredictions(row[2][5:], text_without_spaces)
+                    fieldValues[row[1]]=rectifiedText
+                    columndata.append(rectifiedText)
+                    print(rectifiedText)
+                else:
+                    fieldValues[row[1]]=pytext
+                    columndata.append(pytext)
+                    print(pytext)
             else:
                 columndata.append('')
             block_height = block.shape[0]

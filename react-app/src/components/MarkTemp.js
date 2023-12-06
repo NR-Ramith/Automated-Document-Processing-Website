@@ -224,17 +224,23 @@ class MarkTemp extends Component {
     var opt1 = document.createElement('option')
     var opt2 = document.createElement('option')
     var opt3 = document.createElement('option')
+    var opt4 = document.createElement('option')
+    var opt5 = document.createElement('option')
 
     type.className = 'form-group';
     sel.className = 'form-control';
     sel.id = 'sel1' + this.state.idCount;
     opt1.innerHTML = 'Text';
-    opt2.innerHTML = 'Checkbox';
-    opt3.innerHTML = 'Signature';
+    opt2.innerHTML = 'Text-onlyAlphabets';
+    opt3.innerHTML = 'Text-onlyDigits';
+    opt4.innerHTML = 'Checkbox';
+    opt5.innerHTML = 'Signature';
 
     sel.appendChild(opt1)
     sel.appendChild(opt2)
     sel.appendChild(opt3)
+    sel.appendChild(opt4)
+    sel.appendChild(opt5)
     type.appendChild(sel)
 
     var boxCount = document.createElement('input');
